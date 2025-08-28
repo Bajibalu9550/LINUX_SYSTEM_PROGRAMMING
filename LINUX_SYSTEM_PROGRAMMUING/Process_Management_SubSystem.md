@@ -549,8 +549,96 @@ Char *ptr="RAMAN";
   
     - char *ptr="Balu";  <= rodata segment
     
-    printf("%c",ptr[3]);
+        printf("%c",ptr[3]);
+      
+  **Note:**
+    - To store string we can use character array and character pointer. The string stored using character pointer 4 bytes separate memory is allocated for pointer, ad string get separate memory and string get copied to the rodata segment.
+  
+  ### Command Line Argument
+  - CLA is the mechanism to provide input to the program
+  - Ways of providing inputs are:
+
+      1. Scanf("");
+      2. ./a.out viven ameepeet Hyderabad     --> Provide input during runtime.
+
+  **Q) How do we access CLA in our main function?**
     
+  ```
+  main(int agrc, char *agrv[]){
+    printf("%s",argv[0]);
+    printf("%s",argv[1]);
+    printf("%s",argv[2]);
+    printf("%s",argv[3]);
+  }
+  ```    
+  **OUTPUT:**
+
+  ./sample
+
+  Viven
+
+  ameerpeet
+
+  Hyderabad
+- ls -l it has text, data and BSS segment and program is similar to that of a.out.
+
+**&rarr; ls is a program similar to that of executable file(a.out) but for executing it we do not use ./ infront of ls i.e, ./ls**
+
+- When ever we typr ls oor a.out the kernel application of shell immediately looks into system floder. i.e, /bin , /sbin, etc...
+- ls is there inside /bin thus './' is not required, but a.out is not present in folder. Thus no match found error is displayed.
+- ./ indicates the current directory, therefore ./a.out indicates that a.out is present in current directory.
+
+# Exec() Family Calls
+
+- Any command can be run or executed inside the c-program for that exec() family of calls or standard c-library **system()** is required.
+- Exec() family calls are: 
+
+  1. execl()
+  2. execv()
+  3. execlp()
+  4. execvp()
+- Standard c-library function = **system()**
+
+**Q) What is need of exec() family calls?**
+  
+  1. To run or execute command inside the c-program.
+  2. vfork() is used in combination with exec() family calls.
+  3. It replaces the current process image with new process image.
+
+**Q) How to run ls -l command from c-program?**
+
+```
+main(){
+  execl("/bin/ls","ls","-l",NULL);
+}
+```
+
+**Q) Why we are repeating program name or command name?**
+
+- We are repeating because program name or command names are passed as 1st command argument.
+
+```
+main(){
+  execl("/bin/ls","ls","-l",NULL);
+
+    from execl() control immediately jumps to the ls program main function and CLA will be passed to ls program main function.
+  printf("After exec call\n");
+}
+
+```
+- All these statements are converted to instructions which are the part of a executable file a.out. When execl() is called then ls- command having its own text,data,bss replaces the text,data,Bss segment of a.out.
+
+- exec() call in case of error will return -1 and incase of successful it will return nothing
+
+**Q) How to run sample.c program from program?**
+
+```
+main(){
+  printf("Before exec()\n");
+  execl("./sample","./sample","Viven","ameerpet","Hyderabed",NULL);
+  printf("After Exec()\n");
+}
+```
 
 
 
