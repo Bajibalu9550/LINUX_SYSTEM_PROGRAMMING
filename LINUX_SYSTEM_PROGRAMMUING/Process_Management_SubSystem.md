@@ -642,12 +642,135 @@ main(){
 
 ## Execl() vs Execv()
 
+- Any command can be run or execute inside the c-program for that **exec() family calls** or **standard library system()** are required.
 
+- In case of execl() and exev() also the first argument is some but the difference starts from 2nd argument onwards. CLA are passed as arguments to execl(). In case of execv() the 2nd argument is the base address of array of pointer of character. Which are used for storing base address of multiple strings. In our case mutliple strings are CLA:
+```
+main(){
+  char *argc[4];
+  argc[0]="ls";
+  argc[1]="-l";
+  argc[2]="\0";
+  execv("/bin/ls",argc);
+}
+```
 
+- execv() also performs process image replacement.
 
+```
+execl("/bin/ls","ls","-l",NULL);        execlp("ls","ls","-l",NULL);
+execv("/bin/ls",argc);
+execvp("ls",argc);
+```
+- execvp() and execlp() directly looks into the system folder. where as incase of execl() and execv() we need to provide the path.
 
+#### fork() + exec() family calls
 
+```
+main(){
+  int op1,status;
+  while(1){
+    scanf("%d",&op1);
+    if(!op1)
+      exit(0);
+    id=fork();
+    if(id==0){
+      execl("ls","ls","-l",NULL);
+      printf("This statement never execute");
+      exit(5);
+    }
+    wait(&stattus);
+  }
+}
+```
+- Since execl() is used inside the child process the process image of child process replaces by the execl() process. Whenever the controler comes to execl() the controller jumps from current process to main function of **ls** and execute that process and return/exit value of ls main function stored in status.
 
+**Note:**
+- Thus return status of ls main function i.e, will be hold by the status argument of wait() inside the main function of parent process and exit status of child process will not be executed.
 
+- Shell program run inside kernel application so this shrll uses internally fork() + exec() family calls. In terminal application shell a new child process got created everytime and this child process is replaced by different program(ls).
+
+### Shell Program 
+
+```
+main(){
+  char command[20],*args[4];
+  while(1){
+    puts("my shell >");
+    gets(command);
+    args[0]=command;
+    args[1]='\0';
+    id=fork();
+    if(id==0){
+      execvp(command,args);
+      exit(5);
+    }
+    wait(&status);
+  }
+}
+```
+
+### Creating own Commands
+
+- This code work only for single command line argument.
+
+```
+main(){
+  char command[20],*args[4];
+  int status=0,id;
+  while(1){
+    puts("My shell >");
+    gets(command);
+    args[0]=command;
+    args[1]='\0';
+    if(strncmp(command,"rev",3)==0){
+      printf("Simple shell created: 29 Aug 2025");
+      continue;
+    }
+    if(strncmp(command,"quit",4)==0){
+      exit(2);
+    }
+    id=fork();
+    if(id==0){
+      execvp(command,args);
+      exit(3);
+    }
+  }
+  wait(&status);
+}
+```
+### Create own commands for multiple CLA
+
+```
+main(){
+  char command[100],*args[10];
+  int status=0,id;
+  while(1){
+    printf("My shell >");
+    fgets(command,sizeof(command),stdin);
+    command[strlen(command)-1]='\0';
+    if(strncmp(command,"rev",3)==0){
+      printf("Simple shell program");
+      continue;
+    }
+    if(strncmp(command,"quit",4)==0){
+      exit(1);
+    }
+    int i=0;
+    char *token=strtok(command," ");
+    while(token!=NULL){
+      args[i++]=token;
+      token=strtok(NULL," ");
+    }
+    args[i]=NULL;
+    if=fork();
+    if(id==0){
+      execvp(args[0],args);
+      exit(1);
+    }
+    wait(&status);
+  }
+}
+```
     
     
