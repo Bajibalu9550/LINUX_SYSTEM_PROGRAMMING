@@ -683,10 +683,36 @@ int main() {
     return 0;
 }
 ```
+# 21. C Program: Check if Path is a File or Directory
 
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 
+int main() {
+    char path[100];
+    printf("Enter path: ");
+    scanf("%s", path);
 
+    struct stat st;
+    if (stat(path, &st) == -1) {
+        perror("stat");
+        exit(1);
+    }
 
+    if (S_ISREG(st.st_mode)) {
+        printf("'%s' is a regular file.\n", path);
+    } else if (S_ISDIR(st.st_mode)) {
+        printf("'%s' is a directory.\n", path);
+    } else {
+        printf("'%s' is neither a regular file nor a directory.\n", path);
+    }
+
+    return 0;
+}
+
+```
 
 
 
