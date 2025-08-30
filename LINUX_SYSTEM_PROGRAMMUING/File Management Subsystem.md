@@ -190,4 +190,239 @@
 
     - 3  (as 0,1,2 is already inherited from parent process/or shell program in fd table).
 
-- **Once we get fd we can do read and write operations.** 
+- **Once we get fd we can do read and write operations.**
+
+## Write() System Call
+
+- File  name is accepted as an arguments by open system call. The remaining basic i/o calls uses "fd" as an argument
+
+```
+Syntax: 
+        Char buf[1024];
+        write(fd,buf,strlen(buf));
+```
+- From the base address how many address we want to occupy depends upon the third argument i.e, **strlen(buf);**
+
+- **write() ------>  sys_write()**
+
+    - Uses fd as index to the fd table and it will access file object and inode object.
+    - It uses file object and inode object while writtingg data into file present in hard disk.
+    - The ASCII value of each character is written to file.
+    - On error system call return "-1"
+    - write returns number of bytes copied/written from user space application to the file present in hard disk.
+
+    **O_TRUNC** &rarr; It will completely erase the whole data.
+    **close(fd)** &rarr; Clears the entry in fd table and deallocates the memory.
+    **O_CREAT** &rarr; If file does not exist, create a file. 
+
+    ### Read Operation
+    ---
+    - While reading we assume that file is already existing if it doesnot exist then it will return -1.
+
+    ```
+    Synatax:
+            char buf[20];
+            ret=read(fd,buf,20);
+            buf[ret]='\0';
+    ```
+    - The read() invokes sys_read(3,0xe000,20); It is used first argument fd as index to fd table the file objects and inode objects.
+
+        **Q) Why read need access to file object?**
+
+        1. For checking modes i.e, WRONLY ,RDONLY, or RDWR if there is RDONLY. it will throw error.
+        2. For checking the cursor position, which maintains the locations from where we are going to read or write data.
+
+  - When we use basic i/o calls cursor position can not be seen graphically insted cursor position is seen as a value in a file object.
+  - Initially the cursor position is at '0' . The position changes while reading and writtig the data.
+  - sys_read() will use the file object and inode object for accessing the file present in the hard disk.
+  - It reads the data from the file and copy to the address passed as 2nd arguments i.e, buf. In this operation data immediately get copied to the user space array i.e, buf.
+  - sys_read at the end returns a value i.e, number of bytes copied from file present in hard disk to user space application i.e, file(Hard disk) &rarr; array(user space application).
+  - When the read call completes successfully data is present in the array buf, and to avoid printing garbage value '\0' or null character is added at the end.
+   
+    ```
+    char buf[20];
+    ret=read(fd,buf,20);
+    buf[ret]='\0';
+    printf("\n%s",buf);
+    ```
+    
+
+   - Such strings does not have any null character thus we add null character at the end.
+
+   ![](../images/Read%20Operation.png)
+
+   ```
+   int fd;
+   fd=open("file.txt",O_RDONLY);
+            {Sends requests to the driver to search whether file file.txt is present in the hard disk or not}
+   ```
+   - For creating file using open system call. open("file.txt",O_RDWR | O_CREAT, 0640);
+
+   ```
+   $ cp file1.txt file2.txt
+   ```
+        
+    1. Creates file2.txt
+    2. Copy the contents of file1.txt to file2.txt
+
+    **Requirement:** file.txt should be present with/without same data. 
+- Without reading or writting onto file we can change the cursor position by using **lseek()**
+
+**Q) Can I open same file from multiple process. Explain the memory segment in kernel space?**
+
+![](../images/Same%20inode%20for%20multiple%20process.png)
+
+- While opening multiple process, we will have multiple PCB, multiple file objects, but all the file object will point to the same inode object of file.
+
+**Q) Kernel uses which object to represent file?**
+ 
+ &rarr; Inode Object
+
+**Q) Kernel uses which object to represent open file?**
+
+&rarr; file Object.
+
+**Q) Is there any limit on no.of files that can be opened from the program?**
+
+&rarr; Depends upon the size of fd table i.e, depends how many etries we can enable fd table.
+
+### Standard I/O Calls Vs Basic I/O Calls
+---
+- Standard i/o calls are also called as buffered i/o calls which includes:
+
+    ![](../images/Standard%20io%20calls%20vs%20Basic%20io%20calls.png)
+
+
+- Other than Basic i/o calls and Standard i/o calls. memory mapping call can be used to access file
+- There are two ways to access files using memoey mapping call 
+    1. File mapping technique.
+    2. Anoymous file mapping technique.
+
+**Q) How do you implement yout own copy commands?**
+
+1. By using basic i/o calls
+2. By using standard i/o calls or buffered i/o calls
+3. Memory mapping technique(i.e, mmap())
+
+
+Example: Copy information one file to another file.
+
+```
+char buf[1024];
+int sfd,dfd;
+sfd=open("file1.txt",O_RDONLY);
+dfd=open("filw2.txt",O_WRONLY | O_CREAT, 0640);
+while((x=read(sfd,buf,1024))>0){
+    write(dfd,buf,strlen(buf));
+}
+```
+- Once you reach end of the file read returns 0. The above condition becomes false and loop get terminated.
+
+#### Passing Filename as CLA 
+---
+
+- For accessing CLA we need to modify the main program of the c- program
+
+    ```
+    main(int argc,char *argv[]){
+        - The base address of the CLS is passed to the 2nd arguments.
+
+    sfd=open(argv[1],O_RDONLY);
+    dfd=open(argv[2],O_WRONLY | O_CREAT, 0640);
+    }
+
+    Program name it self is passed as 1st CLA
+    ```
+    **Note:**
+
+    - Size of the file is present in the inode objece of file. Inode is a object of type struct inode for inode object number use command **ls -il**.
+    - Once the file is opened, the inode object of a corresponding file get copied from hard disk to kernel of RAM.
+
+**Q) How do user space application get accessed to the cotent of inode object present in kernel space?**
+
+- By using Basic I/O Calls  stat() and fstat().
+
+**Q) How do you get access to kernel object/ kernel data structure/ or information present in kernel space?**
+
+- There are three various ways: 
+
+    1. Multiple system calls
+    2. Shell command
+    3. Proc virtual file system entry.
+
+    ![](../images/inode%20and%20file%20object%20access.png) 
+
+### Use of stat() and fstat():
+- Let us assume file.txt is already present in the hard disk.
+
+    ![](../images/fstat()%20use.png)
+
+    ```
+    main(){
+        int fd,struct stat buf;
+        fd=open("file.txt",O_RDWR);
+        fstat(fd,&buf);
+        printf("%d",buf.st_size);
+    }
+    ```
+    - Initially the buf was empty, once the fstat() call invoke successsfully the variable memory buf present in user space get the content of inode object present in the kernel space.
+
+## Standard File Discriptor
+
+![](../images/File%20Descriptor.png)
+
+- fd table maintains the information about the file that has been opened.
+- fd is passed as an argument in all other basic i/o calls except "open call".
+
+**Note:**
+
+- fd '0' when passed as an argument in basic i/o call is used for taking input from keyboard.
+- fd '1' and '2' when passed as an argument in basic i/o call is used for printing some information taken from keyboard and error too.
+
+**Q) How to print some string on screen?**
+
+1. printf("Hello world"");
+    
+    puts("Hello World");
+2. System calls
+    
+    - Basic i/o calls   [write()]
+        ```
+        main(){
+            char buf[20];
+            scanf("%s",buf);
+            write(1,buf,strlen(buf));
+        }
+        ```
+        write(1,buf,strlen(buf));
+
+        - buf &rarr; address from where we need to import data.
+        - 1 &rarr; stdout (fd value).
+        
+        write(1,"Hello World",strlen("Hello World"));
+
+        - "Hello world" &rarr; Here the base address of the string is present in rodata segment
+        - Display Hello world to terminal application, console and screen.
+    - printf is the standard library call which internally uses write system call with fd of '1'.
+
+    **Q) How do you prove these strings are stored present in rodata segment?**
+    ```
+      objdump -s ./a.out  and see the rodata segment. 
+    ```
+
+    **Q) Take input from keyboard, store in character array and then display the result?**
+        
+    ```
+    main(){
+        char buf[20];
+        read(0,buf,20);
+        write(1,buf,strlen(buf));
+    }
+    ```
+    - Once write executes successfully it display info onto kernel screen.
+
+    **Note:**
+
+    - Sometimes read behaves as blocking call and sometimes normal call
+- When read is used as standard fd i.e, stdin(fd==0) behaves as blocking call. When read is used in fd behaves as normal call. Read accessing special and device files acts as blocking call.
+- In case of normal fd, once the cursor position reaches the end of the file and still we are trying to read it, then it will return 0. This, inthis case read is not a blocking call but in above mentioned program read acts as blocking call.
