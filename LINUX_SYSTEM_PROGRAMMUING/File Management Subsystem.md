@@ -426,3 +426,131 @@ while((x=read(sfd,buf,1024))>0){
     - Sometimes read behaves as blocking call and sometimes normal call
 - When read is used as standard fd i.e, stdin(fd==0) behaves as blocking call. When read is used in fd behaves as normal call. Read accessing special and device files acts as blocking call.
 - In case of normal fd, once the cursor position reaches the end of the file and still we are trying to read it, then it will return 0. This, inthis case read is not a blocking call but in above mentioned program read acts as blocking call.
+
+**Need of printf:**
+
+- To display the result.
+- Mainly to understand the flow of our program execution.
+
+## dup2() system call
+
+```
+dup2() system call is used for duplicating the file discriptor corresponding entries.
+```
+
+**How multiple process compile together?**
+
+    
+For compilation process:
+
+    1. gcc sample1.c sample2.c
+    2. #include "sample.c"
+    3. Make file and make utility.
+
+- While compiling the multiple files functions named should never be repeated and they should have one main funcntion. i.e, gcc sample1.c sample2.c
+
+- Larger program will display alots of printfs on screen (i.e, Terminal applications) which increases code size application.
+- Once we fit the application (i.e, { } inside it), the entire output is completely lost.
+
+- Inorder to overcome the above problem, by using **redirection** operator:  i.e,  **./a.out > file.txt**
+
+- In this no outputis displayed on the output terminal but the entire output is copied to separate file (i.e, file.txt).
+
+- There are another way to redirect the output to separate file which can be done from c- program by using **dup2() system call**.
+
+    ```
+    mainn(){
+        int sfd=open("file.txt",O_RDWR);
+        if(fd<0){
+            printf("Error in open.\n");
+            exit(1);
+        }
+        printf("Statement 1\n);
+        dup2(fd,1);
+        printf("Mon\n");
+        printf("Yadav\n");
+        printf("Mousam\n");
+    }
+    ```
+    - dup2() call is going to duplicate the file discriptor
+
+        ![](../images/dup2().png)
+    - The 2nd argument of dup2 corresponing to the fd inherited from the init process i.e, stdout, dup2 closes that fd, thus corresponding file object and inode object are destroyed
+    - The fd which is passed as first argument of dup2 is copied to the location mentioned by the 2nd argument in fd table.
+    - Now fd table 1 is not pointing to the file object and inode object that beings to stdout. It will contain the file object and inode object belonging to file.txt.
+
+    **Advantage of dup2() system call:**
+    ```
+    No ouput is displayed on terminal screen, the entire output copied and saved to a separate file.
+    ```
+
+### Permissions
+
+- Permission are need only during creation of file.
+- Permission is represented in octal form i.e, 3bit
+- To understand the permissions 
+    1) User name/ user id
+    2) Group name/group id
+    3) Others
+- During ubuntu installation, the installation package request a user name and password, from system point of you user name/ unique logic name has corresponding unique numeric id or user if(UID).
+- For creating new user account. There is GUL application i.e, **"User account"**.
+- A newly created account has:
+
+    - Separate work space for user in home directory (./home) i.e, separate directories, desktop, documents, music and  many more.
+- When anu user is created from system point of view UID is created.
+- User are created:
+
+    1. During OS Installation
+    2. Using GUI application "user account".
+    3. CLI (Command Line Interface) "Useradd".
+- To understand the permissions for owners and others.we need to understand the **" Users and Groups"**
+
+    **Q) Where do you store ownership information of file?**
+
+    - In inode object, which is present inside the PCB.
+- Form user space thw ownership  information of a file can be fetched bu using command.
+    ```
+    ls -l --> Command
+    fstat() --> System call
+    ```
+- Whatever  information is displayed during ls -l is fetched from the files corresponding to inode object.
+
+**Q) How do you display username corresponding id?**
+
+- **"ls -ln"**
+
+**Q) How to see multiple user information in your system?**
+ 
+- **" cat /etc/passwd "**
+- Each line is going to represent single user. Some users name are created by systems where as some are created by user itself.
+
+    - guest -->system cretaed
+    - Balu --> User created
+
+**Q) How to see multiple group information in your system?**
+
+- **" cat /etc/group "**
+    - guest -GhE51r :x :141:
+
+**Q) Hoe do you change ownership of file?**
+
+1. **System calls**
+
+    - chmod() , fchmod()
+
+    &rarr; chmod("file.txt",UID(2000),GID(4000));
+
+    &rarr; fchmod(fd,2000,4000);
+2. **Command(or shell command)**
+
+    - chmod 2000:5000 file.txt
+
+![](../images/UID%20GID.png)
+
+- When you are accessing the file owner checks for corresponding UID and GID
+
+    1. The locked in UID is compared with UID present in file inode object. If it matches then ownership permission is applied.
+    2. If locked in UID does not matches, then locked in GID in file inode object is checked. If it matches then group permission is applied.
+    3. If UID and GID doesnot matches then others permission is displayed.
+
+**If we do not have match UID and GID but still wants to access the file. It can be done by changing the UID and GID or changing permissions, Otherwise it will throw an error. UID and GID can be changed by using command chmod() and fchmod()**
