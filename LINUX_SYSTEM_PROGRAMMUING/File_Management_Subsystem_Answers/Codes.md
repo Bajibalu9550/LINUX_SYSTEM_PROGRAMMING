@@ -713,6 +713,152 @@ int main() {
 }
 
 ```
+# 22. C Program to Create a Hard Link
+
+This program creates a **hard link** named `hardlink.txt` to an existing file `source.txt` using the `link()` system call.
+
+```c
+#include <stdio.h>
+#include <unistd.h>  // for link()
+#include <errno.h>   // for errno
+#include <string.h>  // for strerror()
+
+int main() {
+    const char *source = "source.txt";      // Original file
+    const char *hardlink = "hardlink.txt";  // Name of the hard link to create
+
+    // Create hard link
+    if (link(source, hardlink) == 0) {
+        printf("Hard link '%s' created successfully for '%s'.\n", hardlink, source);
+    } else {
+        printf("Failed to create hard link: %s\n", strerror(errno));
+    }
+
+    return 0;
+}
+
+NOTE:
+
+Hard links cannot link directories.
+
+Both files must be on the same filesystem.
+
+source.txt and hardlink.txt share the same inode, so changes in one file affect the other.
+
+Possible outputs:
+
+Success: Hard link 'hardlink.txt' created successfully for 'source.txt'.
+
+Failure: Failed to create hard link: No such file or directory or Failed to create hard link: File exists.
+```
+# 23. C Program to Read and Display Contents of a CSV File
+
+This program reads a **CSV file** named `data.csv` and displays its contents line by line.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    FILE *file;
+    char line[1024];  
+
+    
+    file = fopen("data.csv", "r");
+    if (file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    printf("Contents of data.csv:\n");
+
+   
+    while (fgets(line, sizeof(line), file)) {
+        printf("%s", line);  // fgets includes the newline character
+    }
+
+   
+    fclose(file);
+
+    return 0;
+}
+```
+# 24. C Program to Get the Absolute Path of the Current Working Directory
+
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <limits.h>
+#include <stdlib.h>
+
+int main() {
+    char cwd[PATH_MAX];
+
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        printf("Current working directory: %s\n", cwd);
+    } else {
+        perror("getcwd() error");
+        exit(1);
+    }
+
+    return 0;
+}
+```
+# 25. C Program to Get the Size of a Directory Named "Documents"
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <string.h>
+
+long getDirectorySize(const char *path) {
+    struct dirent *entry;
+    struct stat fileStat;
+    DIR *dp = opendir(path);
+    long totalSize = 0;
+    char fullPath[1024];
+
+    if (dp == NULL) {
+        perror("opendir");
+        return 0;
+    }
+
+    while ((entry = readdir(dp)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+
+        snprintf(fullPath, sizeof(fullPath), "%s/%s", path, entry->d_name);
+
+        if (stat(fullPath, &fileStat) == -1) {
+            perror("stat");
+            continue;
+        }
+
+        if (S_ISDIR(fileStat.st_mode)) {
+            totalSize += getDirectorySize(fullPath);
+        } else {
+            totalSize += fileStat.st_size;
+        }
+    }
+
+    closedir(dp);
+    return totalSize;
+}
+
+int main() {
+    const char *dirPath = "Documents";
+    long size = getDirectorySize(dirPath);
+    printf("Total size of directory '%s': %ld bytes\n", dirPath, size);
+    return 0;
+}
+```
+
+
+
+
+
 
 
 
