@@ -51,3 +51,30 @@
     - Compiler can access to other library only when we provide some information about the compilation. The information passed is library name, The actual name used for above library is **"so nmae"** (Shared object name) is a just library name.
     - The name in between lib and so is called so name.
     - So, compilation **gcc -lpthread file.c** (or)  **gcc file.c -lpthread**. Here **'-l'** indicates the library.
+## Arguments of pthread_create
+```
+main(){
+    pthread_t ti;
+    pthread_create(&ti,NULL,threadfun,"....");
+}
+```
+- pthread_t is a type of **"typedef unsigned int"**
+
+### 1st argument: (&li)
+---
+- It is address of a variable of type "pthread_t". Initially it is empty.
+- It is a "Thread Identifier".
+- It is created locally but it did not contain any valid value it is empty.
+- **"ti"** Contains valid thread infromation, used in all sebsequent calls related to thread operations.
+- The os stores all the information about threads inside the thread table.
+
+    ![](../images/Thread%20table.png)
+- In thread table each entry contains information about thread.
+### 2nd Argument(NULL):
+----
+- it id for flags.
+
+### 3rd Argument(threadfun):
+----
+- Every thread has entry point, i.e, threadfun
+- The entry point of thread can accept only **"Single argument"** it cannot accept multiple arguments.
