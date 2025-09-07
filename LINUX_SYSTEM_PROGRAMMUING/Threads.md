@@ -286,3 +286,28 @@ If CPU executing the corresponing base address then 0x0000 is moved to the progr
 ```
 ![](../images/context%20info.jpg)
 
+**Q) When the address incremented in program counter?**
+
+- Once the CPU fetch instruction from program counter, the program counter contains next instruction address.
+
+### Stack Pointer
+
+- It contains the address of top of the stack.
+
+    ![](../images/Stack%20Pointer.jpg)
+
+- Once the CPU completes the execution of process-1 then move to process-1, at this time all CPU registers are lost information about process-1.
+
+    **Q) I dont want to lost the information of process-1 during context switching, What can i do?**
+
+    - Once CPU time expires, we need to keep a backup of all CPU registers information.
+
+    **Q) Where we are copy all these CPU registers information during context switching.?**
+
+    - The CPU registers contents has to copied to some locations in your RAM. i.e, **"Context area"**.
+    - Context area present in the PCB.
+
+    **Q) During the context switching, which instruction will be used to copy the content of CPU register to your context area of PCB?**
+
+    - STR Instruction.
+- When the CPU comes back to process-1, it should start execution from the same location where is was stopped previously and it can be known by looking into program counter, but this time contents are present in the context area of that process PCB. Therefore the content of context area has to be loaded to CPU register by executing LDR intruction.
