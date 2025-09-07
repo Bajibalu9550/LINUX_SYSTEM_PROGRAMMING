@@ -24,6 +24,29 @@ int main() {
     fputs(str, fp);
     fclose(fp);
 }
+
+------------------------------------------------
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<string.h>
+
+int main() {
+    char filename[20];
+    printf("Enter filename: ");
+    scanf("%s", filename);
+
+    int fd = open(filename, O_WRONLY | O_CREAT, 0640);
+    if (fd < 0) {
+        perror("Failed to open\n");
+        exit(1);
+    }
+
+    write(fd, "HELLO WORLD", strlen("HELLO WORLD"));
+    close(fd);
+}
+
 ```
 # 2. C Program: Read Content from a File and Display  
 
@@ -51,6 +74,40 @@ int main() {
 
     fclose(fp);
 }
+
+
+
+--------------------------------------------------------------------
+
+
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<string.h>
+#include<fcntl.h>
+
+int main() {
+    char filename[20];
+    printf("Enter filename: ");
+    scanf("%s", filename);
+
+    int fd = open(filename, O_RDONLY);
+    if (fd < 0) {
+        perror("Failed open\n");
+        close(fd);
+        exit(1);
+    }
+
+    char str[1024];
+    int n;
+    while ((n = read(fd, str, sizeof(str)-1)) > 0) {
+        str[n] = '\0';
+        write(1, str, strlen(str));
+    }
+
+    close(fd);
+}
+
 ```
 
 # 3. C Program: Create a Directory  
@@ -95,6 +152,28 @@ int main() {
         fclose(fp);
     }
 }
+
+------------------------------------------------------------
+
+#include<stdio.h>
+#include<fcntl.h>
+#include<string.h>
+#include<unistd.h>
+
+int main() {
+    char filename[20];
+    printf("Enter filename: ");
+    scanf("%s", filename);
+
+    int fd = open(filename, O_RDONLY);
+    if (fd < 0) {
+        write(1, "File doesnot exist.\n", strlen("File doesnot exist.\n"));
+    } else {
+        write(1, "File exist.\n", strlen("File exist.\n"));
+        close(fd);
+    }
+}
+
 ```
 # 5. C Program: Rename a File  
 
@@ -164,6 +243,36 @@ int main() {
     fclose(sfp);
     fclose(dfp);
 }
+-------------------------------------------------
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+int main() {
+    char sourcefile[20], destfile[20];
+    printf("Enter source file name: ");
+    scanf("%s", sourcefile);
+    printf("Enter destfile: ");
+    scanf("%s", destfile);
+
+    int fd1 = open(sourcefile, O_RDONLY);
+    int fd2 = open(destfile, O_WRONLY | O_CREAT, 0640);
+    if (fd1 < 0 || fd2 < 0) {
+        perror("Failed open()\n");
+        exit(1);
+    }
+
+    char str[1024];
+    int n;
+    while ((n = read(fd1, str, 1024)) > 0) {
+        write(fd2, str, n);
+    }
+
+    close(fd1);
+    close(fd2);
+}
+
 ```
 # 8. C Program: Copy a File from One Directory to Another  
 
@@ -198,6 +307,28 @@ int main() {
 
     printf("File copied successfully from %s to %s\n", src, dest);
 }
+
+-----------------------------------------------------------------------
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    char source[100], dest[100];
+    printf("Enter source file path: ");
+    scanf("%s", source);
+    printf("Enter destination file path: ");
+    scanf("%s", dest);
+
+    if (rename(source, dest) == 0) {
+        printf("File moved successfully.\n");
+    } else {
+        perror("Failed to move file");
+        exit(1);
+    }
+
+    return 0;
+}
+ 
 ```
 # 8. C Program: Copy File Using System Calls (open, read, write)
 
@@ -295,6 +426,32 @@ int main() {
 
     return 0;
 }
+--------------------------------------------------------
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+
+int main() {
+    struct stat s;
+    char filename[20];
+    printf("Enter file name: ");
+    scanf("%s", filename);
+
+    int fd = open(filename, O_RDONLY);
+    if (fd < 0) {
+        perror("Failed open()\n");
+        exit(1);
+    }
+
+    fstat(fd, &s);
+    close(fd);
+
+    printf("Size of file: %ld\n", s.st_size);
+    return 0;
+}
+
 
 ```
 # 11. C Program: Check if a Directory Exists in the Current Directory
