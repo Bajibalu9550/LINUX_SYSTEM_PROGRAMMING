@@ -540,5 +540,120 @@ int main(){
 
     return 0;
 }
+```
+# 16. Develop a C program to create a thread that reads input from the user and synchronizes access to shared resources?
+
+This program demonstrates creating a **POSIX thread** that reads input from the user and uses a **mutex** to synchronize access to a shared resource.
+
+---
+
+## Source Code
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+
+pthread_mutex_t lock;
+char str[1000];
+
+void *string(void *arg){
+    pthread_mutex_lock(&lock);
+    printf("Enter text: ");
+    fgets(str, sizeof(str), stdin);
+    pthread_mutex_unlock(&lock);
+    return NULL;
+}
+
+int main(){
+    pthread_t t1;
+
+    if(pthread_mutex_init(&lock, NULL) != 0){
+        perror("Mutex init failed");
+        exit(1);
+    }
+
+    if(pthread_create(&t1, NULL, string, NULL) != 0){
+        perror("Thread creation failed");
+        exit(1);
+    }
+
+    pthread_join(t1, NULL);
+
+    pthread_mutex_lock(&lock);
+    printf("Entered string: %s\n", str);
+    pthread_mutex_unlock(&lock);
+
+    pthread_mutex_destroy(&lock);
+
+    return 0;
+}
+```
+# 17.Implement a C program to create a thread that prints prime numbers up to a given limit with mutex locks?
+---
+Write a C program to create a thread that prints all prime numbers up to a given limit.
+The program should use mutex locks to synchronize access to shared resources (here, printf).
+## Source Code
+
+```c
+
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <math.h>
+
+pthread_mutex_t lock;
+
+int isprime(int n) {
+    if (n < 2) return 0;
+    for (int i = 2; i <= sqrt(n); i++) {
+        if (n % i == 0) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+void *print_primes(void *arg) {
+    int n = *(int *)arg;
+    for (int i = 2; i <= n; i++) {
+        if (isprime(i)) {
+            pthread_mutex_lock(&lock);
+            printf("%d ", i);
+            pthread_mutex_unlock(&lock);
+        }
+    }
+    printf("\n");
+    return NULL;
+}
+
+int main() {
+    pthread_t t1;
+    int n;
+
+    printf("Enter limit: ");
+    scanf("%d", &n);
+
+    if (n < 2) {
+        printf("No primes below 2\n");
+        return 0;
+    }
+
+    if (pthread_mutex_init(&lock, NULL) != 0) {
+        perror("Mutex init failed\n");
+        exit(1);
+    }
+
+    if (pthread_create(&t1, NULL, print_primes, &n) != 0) {
+        perror("Thread creation failed\n");
+        exit(1);
+    }
+
+    pthread_join(t1, NULL);
+    pthread_mutex_destroy(&lock);
+
+    return 0;
+}
+```
 
 
