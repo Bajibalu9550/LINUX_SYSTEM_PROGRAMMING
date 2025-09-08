@@ -175,4 +175,199 @@ int main() {
     return 0;
 }
 ```
+# 7. Multithreaded Program to Calculate Square of a Number in C
+
+## Source Code
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+
+void *square(void *arg) {
+    int num = *(int *)arg;
+    int *result = malloc(sizeof(int));
+    *result = num * num;
+    return result;
+}
+
+int main() {
+    int *n = malloc(sizeof(int));
+    if (n == NULL) {
+        perror("malloc failed");
+        exit(1);
+    }
+
+    printf("Enter a number: ");
+    scanf("%d", n);
+
+    pthread_t t;
+    if (pthread_create(&t, NULL, square, n) != 0) {
+        perror("failed to create thread");
+        free(n);
+        exit(1);
+    }
+
+    int *sq;
+    pthread_join(t, (void **)&sq);
+
+    printf("Square of num: %d\n", *sq);
+
+    free(n);
+    free(sq);
+    return 0;
+}
+```
+# 9. Multithreaded Program to Check Prime Number in C
+
+## Source Code
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <math.h>
+
+void *prime(void *arg) {
+    int n = *(int *)arg;
+
+    if (n <= 1) {
+        printf("Not prime.\n");
+        return NULL;
+    }
+
+    for (int i = 2; i <= sqrt(n); i++) {
+        if (n % i == 0) {
+            printf("Not prime.\n");
+            return NULL;
+        }
+    }
+
+    printf("Prime.\n");
+    return NULL;
+}
+
+int main() { 
+    int *n = malloc(sizeof(int));
+    if (n == NULL) {
+        perror("malloc failed");
+        exit(1);
+    }
+
+    printf("Enter number: ");
+    scanf("%d", n);
+
+    pthread_t t;
+    if (pthread_create(&t, NULL, prime, n) != 0) {
+        perror("Error create()");
+        free(n);
+        exit(1);
+    }
+
+    pthread_join(t, NULL);
+    free(n);
+
+    return 0;
+}
+
+```
+# 10. Multithreaded Program to Check Palindrome String in C
+
+## Source Code
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <string.h>
+
+void *palindrome(void *arg) {
+    char *str = (char *)arg;
+    int j = strlen(str) - 1;
+    int i = 0;
+
+    while (i < j) {
+        if (str[i] != str[j]) {
+            printf("Not Palindrome.\n");
+            return NULL;
+        }
+        i++;
+        j--;
+    }
+
+    printf("Palindrome\n");
+    return NULL;
+}
+
+int main() {
+    char *str = malloc(100 * sizeof(char));
+    if (str == NULL) {
+        perror("Failed.\n");
+        exit(1);
+    }
+
+    printf("Enter string: ");
+    fgets(str, 100, stdin);
+    str[strlen(str) - 1] = '\0';
+
+    pthread_t t;
+    if (pthread_create(&t, NULL, palindrome, str) != 0) {
+        perror("Failed to create thread.\n");
+        free(str);
+        exit(1);
+    }
+
+    pthread_join(t, NULL);
+    free(str);
+
+    return 0;
+}
+```
+# 11. Multithreaded Program with Synchronization in C
+
+## Source Code
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+#include <string.h>
+#include <stdlib.h>
+
+pthread_mutex_t lock;
+
+void *synchro(void *arg) {
+    pthread_mutex_lock(&lock);
+    char *str = (char *)arg;
+    printf("%s\n", str);
+    pthread_mutex_unlock(&lock);
+    return NULL;
+}
+
+int main() {
+    pthread_t t1, t2;
+
+    if (pthread_mutex_init(&lock, NULL) != 0) {
+        perror("Mutex init failed");
+        exit(1);
+    }
+
+    if (pthread_create(&t1, NULL, synchro, "Hello World") != 0) {
+        perror("Failed t1\n");
+        exit(1);
+    }
+
+    if (pthread_create(&t2, NULL, synchro, "Hello World") != 0) {
+        perror("Failed t2\n");
+        exit(1);
+    }
+
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+
+    pthread_mutex_destroy(&lock);
+
+    return 0;
+}
+```
+
 
