@@ -369,5 +369,176 @@ int main() {
     return 0;
 }
 ```
+# 12. Mutex Synchronization Example in C (POSIX Threads)
+
+This program demonstrates the use of **pthread mutexes** to synchronize access among threads.  
+The mutex ensures that only one thread prints its **Thread ID** at a time, preventing output overlap.
+
+---
+
+## Source Code
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+#include <string.h>
+#include <stdlib.h>
+
+pthread_mutex_t lock;
+
+void *synchro(void *arg) {
+    pthread_mutex_lock(&lock);
+    printf("Thread ID: %lu\n", (unsigned long)pthread_self());
+    pthread_mutex_unlock(&lock);
+    return NULL;
+}
+
+int main() {
+    pthread_t t1, t2;
+
+    if (pthread_mutex_init(&lock, NULL) != 0) {
+        perror("Mutex init failed");
+        exit(1);
+    }
+
+    if (pthread_create(&t1, NULL, synchro, NULL) != 0) {
+        perror("Failed t1");
+        exit(1);
+    }
+
+    if (pthread_create(&t2, NULL, synchro, NULL) != 0) {
+        perror("Failed t2");
+        exit(1);
+    }
+
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+
+    pthread_mutex_destroy(&lock);
+
+    return 0;
+}
+```
+# 14. Threaded Addition with Mutex in C
+
+This program demonstrates using **POSIX threads (pthreads)** with a **mutex** for synchronization.  
+It creates a thread that adds two integers and returns the result to the main thread.
+
+---
+
+## Source Code
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+
+pthread_mutex_t lock;
+
+typedef struct {
+    int a;
+    int b;
+} Node;
+
+void *add(void *arg) {
+    pthread_mutex_lock(&lock);
+    Node *n = (Node *)arg;
+    int *result = malloc(sizeof(int));
+    *result = n->a + n->b;
+    pthread_mutex_unlock(&lock);
+    return result;
+}
+
+int main() {
+    Node node;
+    printf("Enter numbers: ");
+    scanf("%d %d", &node.a, &node.b);
+
+    pthread_t t;
+
+    if (pthread_mutex_init(&lock, NULL) != 0) {
+        perror("Mutex init failed");
+        exit(1);
+    }
+
+    if (pthread_create(&t, NULL, add, &node) != 0) {
+        perror("Thread creation failed");
+        exit(1);
+    }
+
+    int *ptr;
+    pthread_join(t, (void **)&ptr);
+
+    printf("Sum of numbers: %d\n", *ptr);
+
+    free(ptr);
+    pthread_mutex_destroy(&lock);
+
+    return 0;
+}
+```
+# 15. Threaded Increment and Decrement with Mutex in C
+
+This program demonstrates how to use **POSIX threads** and a **mutex** to safely increment and decrement a shared variable.
+
+---
+
+## Source Code
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+
+pthread_mutex_t lock;
+int shar_val = 0;
+
+void *increment(void *arg){
+    for(int i = 0; i < 5; i++){
+        pthread_mutex_lock(&lock);
+        shar_val++;
+        printf("Increment thread: shar_val = %d\n", shar_val);
+        pthread_mutex_unlock(&lock);
+    }
+    return NULL;
+}
+
+void *decrement(void *arg){
+    for(int i = 0; i < 5; i++){
+        pthread_mutex_lock(&lock);
+        shar_val--;
+        printf("Decrement thread: shar_val = %d\n", shar_val);
+        pthread_mutex_unlock(&lock);
+    }
+    return NULL;
+}
+
+int main(){
+    pthread_t t1, t2;
+
+    if(pthread_mutex_init(&lock, NULL) != 0){
+        perror("Mutex init failed");
+        exit(1);
+    }
+
+    if(pthread_create(&t1, NULL, increment, NULL) != 0){
+        perror("Thread 1 creation failed");
+        exit(1);
+    }
+
+    if(pthread_create(&t2, NULL, decrement, NULL) != 0){
+        perror("Thread 2 creation failed");
+        exit(1);
+    }
+
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+
+    printf("Final shared_val = %d\n", shar_val);
+
+    pthread_mutex_destroy(&lock);
+
+    return 0;
+}
 
 
