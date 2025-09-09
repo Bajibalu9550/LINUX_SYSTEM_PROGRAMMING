@@ -655,5 +655,122 @@ int main() {
     return 0;
 }
 ```
+# 19.Write a C program to create a thread that checks if a given year is a leap year using dynamic programming with mutex locks? 
 
+## Source Code
 
+```c
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+
+pthread_mutex_t lock;
+
+void *leapyear(void *arg) {
+    int n = *(int *)arg;
+    pthread_mutex_lock(&lock);
+
+    if ((n % 100 != 0 && n % 4 == 0) || (n % 400 == 0)) {
+        printf("Leap year\n");
+    } else {
+        printf("Non leap year\n");
+    }
+
+    pthread_mutex_unlock(&lock);
+    return NULL;
+}
+
+int main() {
+    pthread_t t;
+    int *year = malloc(sizeof(int));
+
+    printf("Enter Year: ");
+    scanf("%d", year);
+
+    if (pthread_mutex_init(&lock, NULL) != 0) {
+        perror("Failed init\n");
+        exit(1);
+    }
+
+    if (pthread_create(&t, NULL, leapyear, year) != 0) {
+        perror("Failed thread\n");
+        exit(1);
+    }
+
+    pthread_join(t, NULL);
+    pthread_mutex_destroy(&lock);
+    free(year);
+
+    return 0;
+}
+```
+# 20.Write a C program to create a thread that checks if a given string is a palindrome using dynamic programming with mutex locks? 
+
+## Source Code
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <string.h>
+
+pthread_mutex_t lock;
+
+void *check_palindrome(void *arg) {
+    char *ptr = (char *)arg;
+    int i = 0, j = strlen(ptr) - 1;
+    int p = 1;
+
+    while (i < j) {
+        pthread_mutex_lock(&lock);
+        if (ptr[i] != ptr[j]) {
+            p = 0;
+            pthread_mutex_unlock(&lock);
+            break;
+        }
+        i++;
+        j--;
+        pthread_mutex_unlock(&lock);
+    }
+
+    if (p) {
+        printf("Palindrome.\n");
+    } else {
+        printf("Not Palindrome.\n");
+    }
+
+    return NULL;
+}
+
+int main() {
+    pthread_t t;
+    char *str = malloc(100 * sizeof(char));
+
+    if (str == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+
+    printf("Enter string: ");
+    fgets(str, 100, stdin);
+    str[strlen(str) - 1] = '\0';  
+
+    if (pthread_mutex_init(&lock, NULL) != 0) {
+        perror("Failed init\n");
+        exit(1);
+    }
+
+    if (pthread_create(&t, NULL, check_palindrome, str) != 0) {
+        perror("Failed thread\n");
+        exit(1);
+    }
+
+    pthread_join(t, NULL);
+    pthread_mutex_destroy(&lock);
+    free(str);
+
+    return 0;
+}
+```
+
+# 21.Implement a C program to create a thread that performs selection sort on an array of integers? 
