@@ -862,3 +862,33 @@ int  main(){
 
          pthread_join(t1,NULL);
 }
+
+```
+# 23. C Program to Calculate the Sum of Squares of First 100 Natural Numbers Using Threads
+
+## Source Code
+
+```c
+#include<stdio.h>
+#include<pthread.h>
+#include<stdlib.h>
+#include<unistd.h>
+void *sum(void *arg){
+        long int *total=malloc(sizeof(long int));
+        for(int i=1;i<=100;i++){
+                total+=(i*i);
+        }
+        return total;
+}
+int main(){
+        pthread_t t1;
+
+        if(pthread_create(&t1,NULL,sum,NULL)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+        long int **s;
+        pthread_join(t1,(void**)&s);
+        printf("Sum: %ld\n",*(long int**)&s);
+}
+```
