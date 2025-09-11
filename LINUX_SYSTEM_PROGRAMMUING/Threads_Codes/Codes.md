@@ -892,3 +892,54 @@ int main(){
         printf("Sum: %ld\n",*(long int**)&s);
 }
 ```
+# 24. Write a C Program to create a thread that generates a random array of integers?
+
+## Source Code
+
+```c
+#include<pthread.h>
+#include<unistd.h>
+#include<time.h>
+
+#define MAX 1000
+
+int arr[MAX];
+int n;
+
+void *random_generate(void *arg){
+        int rand=*(int*)arg;
+        srand(time(0));
+        for(int i=0;i<n;i++){
+                arr[i]=random() % rand +1;
+        }
+        return NULL;
+}
+
+int main(){
+        pthread_t t1;
+        int *rand=malloc(sizeof(int));
+        printf("Enter size of array (<=%d): ",MAX);
+        scanf("%d",&n);
+        if(n<=0 || n>MAX){
+                printf("Array size invalid.\n");
+                exit(1);
+        }
+        printf("Enter range of random: ");
+        scanf("%d",rand);
+        if(pthread_create(&t1,NULL,random_generate,rand)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+
+        printf("Random generated array: ");
+
+        for(int i=0;i<n;i++){
+                printf("%d ",arr[i]);
+        }
+        printf("\n");
+
+
+}
+```
