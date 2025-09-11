@@ -993,3 +993,46 @@ int main(){
         }
 }
 ```
+# 26. Implement a thread to find GCD of two numbers
+## Source Code
+
+```c
+#include<stdio.h>
+#include<pthread.h>
+#include<unistd.h>
+#include<stdlib.h>
+typedef struct number{
+        int a;
+        int b;
+        int c;
+}Node;
+
+void *gcd(void *arg){
+        Node *ptr=(Node *)arg;
+        int a=ptr->a;
+        int b=ptr->b;
+        while(b!=0){
+                int temp=b;
+                b=a%b;
+                a=temp;
+        }
+        ptr->c=a;
+        return NULL;
+}
+int main(){
+        pthread_t t;
+
+        Node node;
+
+        printf("Enter Numbers: ");
+        scanf("%d %d",&node.a,&node.b);
+
+        if(pthread_create(&t,NULL,gcd,&node)!=0){
+                perror("failed thread.\n");
+                exit(1);
+        }
+         pthread_join(t,NULL);
+
+         printf("GCD of %d and %d : %d\n",node.a,node.b,node.c);
+}
+```
