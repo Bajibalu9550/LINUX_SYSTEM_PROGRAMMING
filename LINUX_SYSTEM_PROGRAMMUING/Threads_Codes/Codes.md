@@ -826,4 +826,39 @@ int main(){
     return 0;
 }
 ```
+# 22. Area of triangle
 
+## Source Code
+
+```c
+#include<stdio.h>
+#include<pthread.h>
+#include<stdlib.h>
+
+struct triangle{
+        float b;
+        float h;
+};
+
+void *area_tr(void *arg){
+        struct triangle *t=(struct triangle*)arg;
+        printf("%.2f\n",0.5*(t->b)*(t->h));
+
+        return NULL;
+}
+
+int  main(){
+        pthread_t t1;
+        struct triangle t;
+         printf("Enter heighr: ");
+         scanf("%f",&t.h);
+         printf("Enter base: ");
+         scanf("%f",&t.b);
+
+         if(pthread_create(&t1,NULL,area_tr,&t)!=0){
+                 perror("thread1.\n");
+                 exit(1);
+         }
+
+         pthread_join(t1,NULL);
+}
