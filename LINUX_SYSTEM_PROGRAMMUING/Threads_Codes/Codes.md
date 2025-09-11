@@ -943,3 +943,53 @@ int main(){
 
 }
 ```
+# 25. Implement a thread that performs bubble sort
+
+## Source Code
+
+```c
+#include<stdio.h>
+#include<pthread.h>
+#include<stdlib.h>
+#include<unistd.h>
+
+void *bubble_sort(void *arg){
+        int *arr=(int *)arg;
+        int n=arr[0];
+        int *a=&arr[1];
+        for(int i=0;i<n-1;i++){
+                for(int j=0;j<n-i-1;j++){
+                        if(a[j]>a[j+1]){
+                                a[j]=(a[j]+a[j+1]) - (a[j+1]=a[j]);
+                        }
+                }
+        }
+        return NULL;
+}
+
+int main(){
+        pthread_t t1;
+        //Node node;
+        int n;
+        printf("Enter size of array: ");
+        scanf("%d",&n);
+        int *arr=malloc((n+1)*sizeof(int));
+        arr[0]=n;
+        printf("Enter array elements: ");
+        for(int i=0;i<n;i++){
+                scanf("%d",&arr[i+1]);
+        }
+
+        if(pthread_create(&t1,NULL,bubble_sort,arr)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+
+        printf("Sorted array: ");
+        for(int i=0;i<n;i++){
+                printf("%d ",arr[i+1]);
+        }
+}
+```
