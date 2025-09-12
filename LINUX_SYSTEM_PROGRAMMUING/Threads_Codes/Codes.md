@@ -1269,3 +1269,40 @@ int main(){
 }
 
 ```
+# 34. Chack whether the given number is perfect square or not.
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<pthread.h>
+#include<math.h>
+void *perfect(void *arg){
+        long int n=*(long int*)arg;
+
+        long int i=sqrt(n);
+                if(i*i==n){
+                        printf("%ld is Perfect square.\n",n);
+                        return NULL;
+                }
+
+        printf("%ld is not perfect square.\n",n);
+        return NULL;
+}
+
+int main(){
+        long int per;
+        printf("Enter number: ");
+        scanf("%ld",&per);
+
+        pthread_t t1;
+
+        if(pthread_create(&t1,NULL,perfect,&per)!=0){
+                perror("Failed.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+}
+```
