@@ -1179,3 +1179,37 @@ int main(){
 }
 
 ```
+# 32. Average of 1 to 100 numbers.
+
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#include<unistd.h>
+
+void *average(void *arg){
+        float *av=malloc(sizeof(float));
+        *av=0;
+        int sum=0;
+        for(int i=1;i<=100;i++){
+                sum+=i;
+        }
+        *av=(float)sum/100;
+        return av;
+}
+
+int main(){
+        pthread_t t1;
+
+        if(pthread_create(&t1,NULL,average,NULL)!=0){
+                perror("Failed.\n");
+                exit(1);
+        }
+        float *avg;
+        pthread_join(t1,(void **)&avg);
+        printf("Average of numbers upto 100: %.2f\n",*avg);
+        free(avg);
+}
+```
