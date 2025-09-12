@@ -1145,3 +1145,37 @@ int main(){
         free(ptr);
 }
 ```
+
+# 30. Write a C Program create thread check if the given year is leap year or not.
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<pthread.h>
+
+void *leapyear(void *arg){
+        int year=*(int *)arg;
+        if((year%4==0 && year %100!=0) || (year%400==0)){
+                printf("%d is leap year.\n",year);
+        }
+        else {
+                printf("%d is Not leap year.\n",year);
+        }
+        return NULL;
+}
+int main(){
+        pthread_t t1;
+        int year;
+        printf("Enter Year: ");
+        scanf("%d",&year);
+        if(pthread_create(&t1,NULL,leapyear,&year)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+}
+
+```
