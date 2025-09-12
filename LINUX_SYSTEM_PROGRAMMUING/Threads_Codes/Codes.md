@@ -1213,3 +1213,59 @@ int main(){
         free(avg);
 }
 ```
+
+# 33. Implement a thread that generate random string.
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<pthread.h>
+#include<string.h>
+
+typedef struct str{
+        int length;
+        char *result;
+}Node;
+
+
+void *randomstring(void *arg){
+        Node *data=(Node*)arg;
+
+        char charset[]="abcdefghijklmnopqrstuvwxyz""ABCDEFGHIJKLMNOPQRSTUVWXYZ""1234567890";
+        int ch=strlen(charset);
+        for(int i=0;i<data->length;i++){
+                int len=rand() % ch;
+                data->result[i]=charset[len];
+        }
+        data->result[data->length]='\0';
+        pthread_exit(NULL);
+}
+int main(){
+        int len;
+        printf("Enter string length: ");
+        scanf("%d",&len);
+
+        char *str=malloc(len+1);
+        if(str==NULL){
+                printf("Memory allocation failed.\n");
+                exit(1);
+        }
+        Node node;
+        pthread_t t1;
+
+        node.length=len;
+        node.result=str;
+        srand(time(NULL));
+        if(pthread_create(&t1,NULL,randomstring,&node)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+        printf("Random string: %s\n",str);
+        free(str);
+}
+
+```
