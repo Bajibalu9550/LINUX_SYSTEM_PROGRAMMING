@@ -1306,3 +1306,36 @@ int main(){
         pthread_join(t1,NULL);
 }
 ```
+# 35. Create a threadSum of digits in given number
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<pthread.h>
+
+void *sum_of_digits(void *arg){
+        int d=*(int *)arg;
+        int sum=0;
+        while(d!=0){
+                sum+=(d%10);
+                d/=10;
+        }
+        printf("Sum of digits in given number: %d\n",sum);
+        return NULL;
+}
+int  main(){
+        pthread_t t1;
+        int n;
+        printf("Enter Number: ");
+        scanf("%d",&n);
+
+        if(pthread_create(&t1,NULL,sum_of_digits,&n)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+}
+```
