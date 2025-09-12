@@ -1339,3 +1339,41 @@ int  main(){
         pthread_join(t1,NULL);
 }
 ```
+# 36. Write a C program create a thread to find the factorial of number using recursion.
+
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<pthread.h>
+
+long long int facto(int n){
+        if(n==0 || n==1)
+                return 1;
+        return n*facto(n-1);
+}
+void *factorial(void *arg){
+        int d=*(int *)arg;
+        long long int *fac=malloc(sizeof(long long int));
+        *fac=0;
+        *fac=facto(d);
+        return fac;
+}
+int main(){
+        int n;
+        printf("Enter Number: ");
+        scanf("%d",&n);
+
+        pthread_t t1;
+
+        if(pthread_create(&t1,NULL,factorial,&n)!=0){
+                perror("Failed.\n");
+                exit(1);
+        }
+        long long int *fact;
+        pthread_join(t1,(void **)&fact);
+        printf("Factorial of %d is: %lld\n",n,*fact);
+}
+```
