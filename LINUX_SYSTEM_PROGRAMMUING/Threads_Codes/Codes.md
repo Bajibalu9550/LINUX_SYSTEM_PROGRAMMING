@@ -1036,3 +1036,45 @@ int main(){
          printf("GCD of %d and %d : %d\n",node.a,node.b,node.c);
 }
 ```
+# 27. Sum of fibonacci series upto limit.
+
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#include<unistd.h>
+typedef struct fibb{
+        int limit;
+        long long int sum;
+}node;
+void *fib(void *arg){
+        node *data=(node *)arg;
+
+        int a=0,b=1,next=0,sum=0;
+        for(int i=1;i<=data->limit;i++){
+                sum+=a;
+                next=a+b;
+                a=b;
+                b=next;
+        }
+        data->sum=sum;
+        return NULL;
+}
+
+int main(){
+        pthread_t t1;
+        node data;
+        printf("Enter limit: ");
+        scanf("%d",&data.limit);
+        if(pthread_create(&t1,NULL,fib,&data)!=0){
+                perror("failed thread.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+        printf("Sun of fibonacci series upto: %lld\n",data.sum);
+}
+
+```
