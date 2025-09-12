@@ -1111,3 +1111,37 @@ int main(){
 
 }
 ```
+# 29. Wriite a C Program create a thread that calculates factorial of a given number using iterations.
+## Source Code
+
+```c
+
+#include<stdio.h>
+#include<pthread.h>
+#include<stdlib.h>
+
+void *factorial(void *arg){
+        int n=*(int*)arg;
+        long int *fact=malloc(sizeof(long int));
+        *fact=1;
+        for(int i=1;i<=n;i++){
+                *fact*=i;
+        }
+        return fact;
+}
+int main(){
+        pthread_t t1;
+        int n;
+        printf("Enter Number: ");
+        scanf("%d",&n);
+        long int *ptr;
+        if(pthread_create(&t1,NULL,factorial,&n)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,(void**)&ptr);
+        printf("Factorial of %d is: %ld\n",n,*ptr);
+        free(ptr);
+}
+```
