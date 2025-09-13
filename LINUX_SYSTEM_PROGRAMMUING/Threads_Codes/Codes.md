@@ -1762,3 +1762,36 @@ int main(){
         printf("Area of rectangle: %.2f\n",node.area);
 }
 ```
+# 46. Create a thread that generate random numbers
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#include<time.h>
+
+void *randomm(void *arg){
+        int n=*(int *)arg;
+
+        for(int i=0;i<n;i++){
+                printf("Generated %dst number: %d\n",i+1,rand() %100);
+        }
+        return NULL;
+}
+int main(){
+        int n;
+        pthread_t t1;
+        printf("Enter Number: ");
+        scanf("%d",&n);
+
+        srand(time(0));
+
+        if(pthread_create(&t1,NULL,randomm,&n)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+}
+```
