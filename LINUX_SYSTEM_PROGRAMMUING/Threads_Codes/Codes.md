@@ -1693,7 +1693,7 @@ int main(){
         free(f);
 }
 ```
-# 43. Print Factorial of numbers from 1 to 10.
+# 44. Print Factorial of numbers from 1 to 10.
 ## Source Code
 
 ```c
