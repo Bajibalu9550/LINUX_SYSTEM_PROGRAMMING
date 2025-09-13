@@ -1693,3 +1693,35 @@ int main(){
         free(f);
 }
 ```
+# 43. Print Factorial of numbers from 1 to 10.
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+
+int factorial(int n){
+        int i=1,fact=1;
+        while(i<=n){
+                fact*=i;
+                i++;
+        }
+        return fact;
+}
+void *fact(void *arg){
+        for(int i=1;i<=10;i++){
+                printf("Factorial of %d is: %d\n",i,factorial(i));
+        }
+        return NULL;
+}
+int main(){
+        pthread_t t1;
+        if(pthread_create(&t1,NULL,fact,NULL)!=0){
+                perror("Failed thred.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+}
+```
