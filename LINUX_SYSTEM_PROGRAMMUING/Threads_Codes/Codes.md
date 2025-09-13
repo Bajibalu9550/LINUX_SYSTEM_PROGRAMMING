@@ -1644,3 +1644,52 @@ int main(){
         }
 }
 ```
+# 43. Write a C Program that creates thread and sum of array elements.
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#define MAX 100
+
+int a[MAX];
+
+void *average(void *arg){
+        int n=*(int *)arg;
+        int *sum=malloc(sizeof(int));
+        *sum=0;
+        for(int i=0;i<n;i++){
+                *sum+=a[i];
+        }
+        return sum;
+}
+int main(){
+        int n;
+        printf("Enter array size:(<%d): ",MAX);
+        scanf("%d",&n);
+        if(n<0 || n>MAX){
+                printf("Enter array size between 1 to %d\n",MAX);
+                return 1;
+        }
+
+
+        printf("Enter array elements: ");
+        for(int i=0;i<n;i++){
+                scanf("%d",&a[i]);
+        }
+
+        pthread_t t1;
+
+        if(pthread_create(&t1,NULL,average,&n)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+
+        int *f;
+        pthread_join(t1,(void **)&f);
+
+        printf("Sum of array: %d\n",*f);
+        free(f);
+}
+```
