@@ -1422,3 +1422,61 @@ int main(){
         free(max1);
 }
 ```
+# 38. Write a C program to create a thread and sort array strings.
+## Source Code
+
+```c
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<pthread.h>
+#define MAX 50
+char *arr[50];
+
+
+void *sort_strings(void *arg){
+        int n=*(int *)arg;
+        char *temp;
+        for(int i=0;i<n-1;i++){
+                for(int j=i+1;j<n;j++){
+                        if(strcmp(arr[i],arr[j])>0){
+                                temp=arr[i];
+                                arr[i]=arr[j];
+                                arr[j]=temp;
+                        }
+                }
+        }
+        return NULL;
+}
+int main(){
+        int n;
+        printf("Enter number of strings:(<%d): ",MAX);
+        scanf("%d",&n);
+        getchar();
+        for(int i=0;i<n;i++){
+                arr[i]=malloc(100);
+                if(arr[i]==NULL){
+                        printf("Memory allocation failed.\n");
+                        exit(1);
+                }
+                printf("Enter %d string: ",i+1);
+                fgets(arr[i],100,stdin);
+                arr[i][strlen(arr[i])-1]='\0';
+        }
+        pthread_t t1;
+
+        if(pthread_create(&t1,NULL,sort_strings,&n)!=0){
+                printf("Failed thread.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+        printf("Sorted List: ");
+        for(int i=0;i<n;i++){
+                printf("%s ",arr[i]);
+        }
+        for(int i=0;i<n;i++)
+
+            free(a[i]);
+        printf("\n");
+}
