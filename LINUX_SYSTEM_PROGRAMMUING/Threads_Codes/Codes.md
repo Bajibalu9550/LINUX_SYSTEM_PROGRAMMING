@@ -1565,3 +1565,47 @@ int main(){
         free(f);
 }
 ```
+# 41. Write a C Program to create thread and generate random password.
+
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#include<string.h>
+#include<time.h>
+
+void *genarate_password(void *argg){
+        int n=*(int *)argg;
+
+        char ch[]="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*?";
+        int len=strlen(ch);
+        char *pass=malloc(n+1);
+        if(pass==NULL){
+                printf("Memory allocation failed.\n");
+                exit(1);
+        }
+        for(int i=0;i<n;i++){
+                pass[i]=ch[rand() % len];
+        }
+        pass[n]='\0';
+        return pass;
+}
+
+int main(){
+        int length;
+        printf("Enter length of password do you want: ");
+        scanf("%d",&length);
+        pthread_t t1;
+        srand(time(NULL));
+        if(pthread_create(&t1,NULL,genarate_password,&length)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        };
+        char *ch1;
+        pthread_join(t1,(void **)&ch1);
+        printf("Genarated password: %s\n",ch1);
+        free(ch1);
+}
+```
