@@ -1480,3 +1480,38 @@ int main(){
             free(a[i]);
         printf("\n");
 }
+```
+# 39. Write a program to create thread that calculate the square root of number.
+## Source Code
+
+```c
+#include<stdio.h>
+#include<math.h>
+#include<pthread.h>
+#include<stdlib.h>
+
+
+void *square_root(void *arg){
+        int n=*(int *)arg;
+        float *f=malloc(sizeof(float));
+        *f=sqrt(n);
+        return f;
+}
+
+int main(){
+        int n;
+        printf("Enter Number: ");
+        scanf("%d",&n);
+        pthread_t t1;
+        if(pthread_create(&t1,NULL,square_root,&n)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+
+        float *f;
+
+        pthread_join(t1,(void **)&f);
+        printf("Square root of number %d is: %.3f\n",n,*f);
+        free(f);
+}
+```
