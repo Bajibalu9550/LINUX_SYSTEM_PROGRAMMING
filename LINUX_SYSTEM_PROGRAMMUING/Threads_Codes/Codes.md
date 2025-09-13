@@ -1725,3 +1725,40 @@ int main(){
         pthread_join(t1,NULL);
 }
 ```
+# 45. Calculate the area of rectangle.
+## Source Code
+
+```c
+#include<stdio.h>
+#include<pthread.h>
+#include<stdlib.h>
+typedef struct ar{
+        float length;
+        float breadth;
+        float area;
+}Node;
+
+void *rectangle(void *arg){
+        Node *ptr=(Node *)arg;
+
+        ptr->area = ptr->length * ptr->breadth;
+
+        return NULL;
+}
+int main(){
+
+        Node node;
+        printf("Enter length and breadth: ");
+        scanf("%f %f",&node.length,&node.breadth);
+
+        pthread_t t1;
+        if(pthread_create(&t1,NULL,rectangle,&node)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+
+        printf("Area of rectangle: %.2f\n",node.area);
+}
+```
