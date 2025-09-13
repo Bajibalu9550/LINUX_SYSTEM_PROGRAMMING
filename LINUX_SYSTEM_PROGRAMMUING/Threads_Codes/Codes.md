@@ -1609,3 +1609,38 @@ int main(){
         free(ch1);
 }
 ```
+# 42. Write a program to create thread given number even or not.
+## Source Code
+
+```c
+#include<stdio.h>
+#include<pthread.h>
+#include<stdlib.h>
+int g=0;
+
+void *even(void *arg){
+        int n=*(int *)arg;
+        if(n%2==0)
+                g=1;
+        return NULL;
+}
+int main(){
+        int n;
+        printf("Enter Number: ");
+        scanf("%d",&n);
+
+        pthread_t t1;
+
+        if(pthread_create(&t1,NULL,even,&n)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+        pthread_join(t1,NULL);
+        if(g){
+                printf("Even\n");
+        }
+        else {
+                printf("Odd\n");
+        }
+}
+```
