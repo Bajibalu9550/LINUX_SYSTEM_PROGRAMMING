@@ -1515,3 +1515,53 @@ int main(){
         free(f);
 }
 ```
+# 40. Write a C program create thread find average of array elements.
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#define MAX 100
+
+int a[MAX];
+
+void *average(void *arg){
+        int n=*(int *)arg;
+        float sum=0;
+        for(int i=0;i<n;i++){
+                sum+=a[i];
+        }
+        float *f=malloc(sizeof(float));
+        *f=sum/n;
+        return f;
+}
+int main(){
+        int n;
+        printf("Enter array size:(<%d): ",MAX);
+        scanf("%d",&n);
+        if(n<0 || n>MAX){
+                printf("Enter array size between 1 to %d\n",MAX);
+                return 1;
+        }
+
+
+        printf("Enter array elements: ");
+        for(int i=0;i<n;i++){
+                scanf("%d",&a[i]);
+        }
+
+        pthread_t t1;
+
+        if(pthread_create(&t1,NULL,average,&n)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+
+        float *f;
+        pthread_join(t1,(void **)&f);
+
+        printf("Average of array: %.2f\n",*f);
+        free(f);
+}
+```
