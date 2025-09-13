@@ -1377,3 +1377,48 @@ int main(){
         printf("Factorial of %d is: %lld\n",n,*fact);
 }
 ```
+# 37. Develop a C Program create a thread that find out the maximum element in array. 
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#define MAX 1000
+int a[MAX];
+
+
+void *longest(void *arg){
+        int n=*(int*)arg;
+        int *max=malloc(sizeof(int));
+        *max=a[0];
+        for(int i=1;i<n;i++){
+                if(*max<a[i])
+                        *max=a[i];
+        }
+        return max;
+}
+
+int main(){
+        int n;
+        printf("Enter array length(<%d): ",MAX);
+        scanf("%d",&n);
+
+        printf("Enter array elements: ");
+        for(int i=0;i<n;i++){
+                scanf("%d",&a[i]);
+        }
+        pthread_t t1;
+
+        if(pthread_create(&t1,NULL,longest,&n)!=0){
+                perror("Failed thread.");
+                exit(1);
+        }
+        int *max1;
+
+        pthread_join(t1,(void **)&max1);
+
+        printf("Largest element in the array: %d\n",*max1);
+        free(max1);
+}
+```
