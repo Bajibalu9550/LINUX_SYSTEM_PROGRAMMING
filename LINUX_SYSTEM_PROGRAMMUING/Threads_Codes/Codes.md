@@ -1948,7 +1948,7 @@ int  main(){
         free(str);
 }
 ```
-# 50. Write a Program to create thread perform addition of matrices.
+# 51. Write a Program to create thread perform addition of matrices.
 ## Source Code
 
 ```c
@@ -2039,5 +2039,52 @@ int main() {
     free(C);
 
     return 0;
+}
+```
+# 52. Write a program create thread a find lenght of the string
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#include<string.h>
+
+void *langth(void *arg){
+        char *ptr=(char *)arg;
+
+        int *count=malloc(sizeof(int));
+        if(count==NULL){
+                printf("Memory alocation failed.\n");
+                exit(1);
+        }
+        *count=0;
+        while(*ptr!='\0'){
+                *count=*count+1;
+                ptr++;
+        }
+        pthread_exit(count);
+}
+int main(){
+        pthread_t t1;
+        char *str=malloc(sizeof(char) * 200);
+        if(str==NULL){
+                printf("Memory allocation failed.\n");
+                exit(1);
+        }
+        printf("Enter string: ");
+
+        fgets(str,200,stdin);
+        str[strlen(str)-1]='\0';
+         if(pthread_create(&t1,NULL,langth,str)!=0){
+                 perror("Failed thread.\n");
+                 exit(1);
+         }
+
+         int *len;
+         pthread_join(t1,(void **)&len);
+
+         printf("Length of the strig: %d\n",*len);
+         free(len);
 }
 ```
