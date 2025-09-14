@@ -1841,3 +1841,65 @@ int main(){
         printf("\n");
 }
 ```
+# 48. Write a C program to create thread and search for an element.
+
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+
+typedef struct node{
+        int len;
+        int *a;
+        int n;
+}Node;
+
+void *sort(void *arg){
+        Node *ptr=(Node *)arg;
+        int *flag=malloc(sizeof(int));
+        *flag=0;
+        for(int i=0;i<ptr->len;i++){
+                if(ptr->a[i]==ptr->n){
+                        *flag=1;
+                        break;
+                }
+        }
+
+        return flag;
+}
+int main(){
+        pthread_t t1;
+        Node node;
+        printf("Enter array size: ");
+        scanf("%d",&node.len);
+        int *arr=malloc(sizeof(int) *node.len);
+        if(arr==NULL){
+                printf("Memory allocation failed.\n");
+                exit(1);
+        }
+
+        node.a=arr;
+        printf("array elements: ");
+        for(int i=0;i<node.len;i++){
+                scanf("%d",&node.a[i]);
+        }
+
+        printf("Enter searching element: ");
+        scanf("%d",&node.n);
+        if(pthread_create(&t1,NULL,sort,&node)!=0){
+                perror("Failed to load.\n");
+                exit(1);
+        }
+        int *fl;
+        pthread_join(t1,(void **)&fl);
+        if(*fl)
+                printf("Present.\n");
+        else
+                printf("Not present.\n");
+
+        free(fl);
+        free(arr);
+}
+```
