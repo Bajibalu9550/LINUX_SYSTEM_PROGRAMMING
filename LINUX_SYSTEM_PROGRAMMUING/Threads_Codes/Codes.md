@@ -1948,3 +1948,96 @@ int  main(){
         free(str);
 }
 ```
+# 50. Write a Program to create thread perform addition of matrices.
+## Source Code
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+typedef struct {
+    int row, col;
+    int **A, **B, **C;
+} ElementData;
+
+void *add_element(void *arg) {
+    ElementData *data = (ElementData *)arg;
+    int r = data->row;
+    int c = data->col;
+    data->C[r][c] = data->A[r][c] + data->B[r][c];
+    return NULL;
+}
+
+int main() {
+    int m, n;
+    printf("Enter rows and columns of matrices: ");
+    scanf("%d %d", &m, &n);
+
+
+    int **A = malloc(m * sizeof(int *));
+    int **B = malloc(m * sizeof(int *));
+    int **C = malloc(m * sizeof(int *));
+    for (int i = 0; i < m; i++) {
+        A[i] = malloc(n * sizeof(int));
+        B[i] = malloc(n * sizeof(int));
+        C[i] = malloc(n * sizeof(int));
+    }
+
+
+    printf("Enter elements of first matrix:\n");
+    for (int i = 0; i < m; i++)
+        for (int j = 0; j < n; j++)
+            scanf("%d", &A[i][j]);
+
+
+    printf("Enter elements of second matrix:\n");
+    for (int i = 0; i < m; i++)
+        for (int j = 0; j < n; j++)
+            scanf("%d", &B[i][j]);
+
+
+    pthread_t threads[m][n];
+    ElementData edata[m][n];
+
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            edata[i][j].row = i;
+            edata[i][j].col = j;
+            edata[i][j].A = A;
+            edata[i][j].B = B;
+            edata[i][j].C = C;
+
+            if (pthread_create(&threads[i][j], NULL, add_element, &edata[i][j]) != 0) {
+                perror("Thread creation failed");
+                exit(1);
+            }
+        }
+    }
+
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            pthread_join(threads[i][j], NULL);
+        }
+    }
+
+    printf("Resultant matrix (A + B):\n");
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%d ", C[i][j]);
+        }
+        printf("\n");
+    }
+
+    for (int i = 0; i < m; i++) {
+        free(A[i]);
+        free(B[i]);
+        free(C[i]);
+    }
+    free(A);
+    free(B);
+    free(C);
+
+    return 0;
+}
+```
