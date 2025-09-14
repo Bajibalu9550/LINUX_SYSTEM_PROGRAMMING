@@ -1903,3 +1903,48 @@ int main(){
         free(arr);
 }
 ```
+# 49. Write a program to create that reverse a string.
+## Source Code
+
+```c
+#include<stdio.h>
+#include<string.h>
+#include<pthread.h>
+#include<stdlib.h>
+
+void *reverse(void *arg){
+        char *ptr=(char*)arg;
+        int j=strlen(ptr)-1;
+        int i=0;
+        while(i<j){
+                ptr[i]=ptr[i]^ptr[j];
+                ptr[j]=ptr[i]^ptr[j];
+                ptr[i]=ptr[i]^ptr[j];
+                i++;
+                j--;
+        }
+        return NULL;
+}
+int  main(){
+        pthread_t t1;
+
+        char *str=malloc(200);
+        if(str==NULL){
+                printf("Memory allocation failed.\n");
+                exit(1);
+        }
+
+        printf("Enter string: ");
+        fgets(str,200,stdin);
+        str[strlen(str)-1]='\0';
+
+        if(pthread_create(&t1,NULL,reverse,str)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+        printf("Reversed string: %s\n",str);
+        free(str);
+}
+```
