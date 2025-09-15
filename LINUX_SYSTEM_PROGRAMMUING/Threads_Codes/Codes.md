@@ -2525,3 +2525,36 @@ int main(){
         printf("Thread execution completed.\n");
 }
 ```
+# 61. C program create thread that prints the even numbers between 1 to 20
+## Source Code
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+void* printEven(void* arg) {
+    printf("Even numbers between 1 and 20 are:\n");
+    for (int i = 1; i <= 20; i++) {
+        if (i % 2 == 0) {
+            printf("%d ", i);
+        }
+    }
+    printf("\n");
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t tid;
+
+    if (pthread_create(&tid, NULL, printEven, NULL) != 0) {
+        printf("Error: Failed to create thread.\n");
+        return 1;
+    }
+
+    pthread_join(tid, NULL);
+
+    printf("Main thread finished.\n");
+    return 0;
+}
+```
