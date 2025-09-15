@@ -2306,3 +2306,82 @@ int main(){
         sem_destroy(&lock);
 }
 ```
+# 57. Write a C Program to impement the producer - consumer problem using threads. Create two threads one for producing items and another for consuming items from a shared buffer?
+## Source Code
+
+```c
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#include<unistd.h>
+#define BUFFER_SIZE 5
+
+int buff[BUFFER_SIZE];
+
+int in=0,out=0,count=0;
+
+pthread_mutex_t lock;
+pthread_cond_t no_full,no_empty;
+void *producer(void *arg){
+        int item=1;
+        while(1){
+                pthread_mutex_lock(&lock);
+                while(count==BUFFER_SIZE){
+                        printf("Producer wait, buffer full......\n");
+                        pthread_cond_wait(&no_full,&lock);
+                }
+
+                buff[in]=item;
+                printf("Produced: %d at index: %d\n",item,in);
+                count++;
+                in=(in + 1) % BUFFER_SIZE;
+                item++;
+
+                pthread_cond_signal(&no_empty);
+                pthread_mutex_unlock(&lock);
+                sleep(1);
+        }
+        return NULL;
+}
+
+void *consumer(void *arg){
+        while(1){
+                pthread_mutex_lock(&lock);
+
+                while(count==0){
+                        printf("Consumer wait, buffer empty.....\n");
+                        pthread_cond_wait(&no_empty,&lock);
+                }
+
+                int item=buff[out];
+                printf("Consumer: %d at index: %d\n",item,out);
+                out=(out+1) % BUFFER_SIZE;
+
+                count--;
+
+                pthread_cond_signal(&no_full);
+                pthread_mutex_unlock(&lock);
+
+                sleep(2);
+        }
+        return NULL;
+}
+
+int main(){
+        pthread_t t1,t2;
+
+        pthread_mutex_init(&lock,NULL);
+        pthread_cond_init(&no_full,NULL);
+        pthread_cond_init(&no_empty,NULL);
+
+        pthread_create(&t1,NULL,producer,NULL);
+        pthread_create(&t2,NULL,consumer,NULL);
+
+        pthread_join(t1,NULL);
+        pthread_join(t2,NULL);
+
+        pthread_mutex_destroy(&lock);
+        pthread_cond_destroy(&no_full);
+        pthread_cond_destroy(&no_empty);
+}
