@@ -2133,3 +2133,58 @@ int main(){
 }
 
 ```
+# 54. Modify the previous problem to pass arguments to threads and print those arguments along with the thread ID?
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+
+typedef struct {
+        int a;
+        int b;
+}Node;
+pthread_mutex_t lock;
+void *threadfun1(void *arg){
+        Node *ptr=(Node *)arg;
+        pthread_mutex_lock(&lock);
+        printf("Thread 1: sum: %d and My ID: %lu\n",ptr->a + ptr->b,(unsigned long)pthread_self());
+        pthread_mutex_unlock(&lock);
+        return NULL;
+}
+
+void *threadfun2(void *arg){
+        Node *ptr=(Node *)arg;
+
+        pthread_mutex_lock(&lock);
+
+        printf("Thread 2: Difference: %d and My ID: %lu\n",ptr->a - ptr->b,(unsigned long)pthread_self());
+
+        pthread_mutex_unlock(&lock);
+
+        return NULL;
+}
+
+int main(){
+        pthread_t t1,t2;
+
+        pthread_mutex_init(&lock,NULL);
+        Node node;
+        printf("Enter Numbers: ");
+        scanf("%d %d",&node.a,&node.b);
+        if(pthread_create(&t1,NULL,threadfun1,&node)!=0){
+                perror("Failed thread1.\n");
+                exit(1);
+        }
+
+        if(pthread_create(&t2,NULL,threadfun2,&node)!=0){
+                perror("Failed thread2.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+        pthread_join(t2,NULL);
+        pthread_mutex_destroy(&lock);
+}
+```
