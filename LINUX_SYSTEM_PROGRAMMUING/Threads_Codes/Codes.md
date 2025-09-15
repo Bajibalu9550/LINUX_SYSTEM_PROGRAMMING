@@ -2693,3 +2693,420 @@ int main(void) {
     return 0;
 }
 ```
+# 65.To create a thread that prints first 10 terms of fibonacci sequence?
+
+## Source Code
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+
+void *fibonacci_thread(void *arg) {
+    int n = *(int *)arg;
+    int a = 0, b = 1, c;
+    printf("Fibonacci series up to %d terms:\n", n);
+    for (int i = 1; i <= n; i++) {
+        printf("%d ", a);
+        c = a + b;
+        a = b;
+        b = c;
+    }
+    printf("\n");
+    return NULL;
+}
+
+int main(void) {
+    pthread_t tid;
+    int terms = 10;
+
+    pthread_create(&tid, NULL, fibonacci_thread, &terms);
+    pthread_join(tid, NULL);
+
+    return 0;
+}
+```
+# 66. Create a thread that find the maximum number in array.
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#define MAX 1000
+int a[MAX];
+
+
+void *longest(void *arg){
+        int n=*(int*)arg;
+        int *max=malloc(sizeof(int));
+        *max=a[0];
+        for(int i=1;i<n;i++){
+                if(*max<a[i])
+                        *max=a[i];
+        }
+        return max;
+}
+
+int main(){
+        int n;
+        printf("Enter array length(<%d): ",MAX);
+        scanf("%d",&n);
+
+        printf("Enter array elements: ");
+        for(int i=0;i<n;i++){
+                scanf("%d",&a[i]);
+        }
+        pthread_t t1;
+
+        if(pthread_create(&t1,NULL,longest,&n)!=0){
+                perror("Failed thread.");
+                exit(1);
+        }
+        int *max1;
+
+        pthread_join(t1,(void **)&max1);
+
+        printf("Largest element in the array: %d\n",*max1);
+        free(max1);
+}
+```
+# 67. Print ascii value of each character in given string.
+## Source Code
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+#include <string.h>
+
+void *ascii_thread(void *arg) {
+    char *str = (char *)arg;
+    printf("ASCII values:\n");
+    for (int i = 0; i < strlen(str); i++) {
+        printf("%c -> %d\n", str[i], str[i]);
+    }
+    return NULL;
+}
+
+int main(void) {
+    pthread_t tid;
+    char str[100];
+
+    printf("Enter a string: ");
+    //scanf("%99s", str);
+    fgets(str,sizeof(str),stdin);
+    str[strlen(str)-1]='\0';
+
+    pthread_create(&tid, NULL, ascii_thread, str);
+    pthread_join(tid, NULL);
+
+    return 0;
+}
+
+```
+
+# 68. Create thread that calculate sum of prime numbers upto limit
+## Source Code
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+#include <math.h>
+
+int is_prime(int n) {
+    if (n < 2) return 0;
+    if (n == 2) return 1;
+    if (n % 2 == 0) return 0;
+    for (int i = 3; i <= sqrt(n); i += 2) {
+        if (n % i == 0) return 0;
+    }
+    return 1;
+}
+
+void *prime_sum_thread(void *arg) {
+    int limit = *(int *)arg;
+    long long sum = 0;
+    for (int i = 2; i <= limit; i++) {
+        if (is_prime(i)) {
+            sum += i;
+        }
+    }
+    printf("Sum of all prime numbers up to %d = %lld\n", limit, sum);
+    return NULL;
+}
+
+int main(void) {
+    pthread_t tid;
+    int limit;
+
+    printf("Enter limit: ");
+    scanf("%d", &limit);
+
+    pthread_create(&tid, NULL, prime_sum_thread, &limit);
+    pthread_join(tid, NULL);
+
+    return 0;
+}
+```
+# 69. Create thread that calculate area of circle for given radius?
+## Source Code
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+#define PI 3.14159
+
+void *circle_area_thread(void *arg) {
+    double radius = *(double *)arg;
+    double area = PI * radius * radius;
+    printf("Area of circle with radius %.2f = %.2f\n", radius, area);
+    return NULL;
+}
+
+int main(void) {
+    pthread_t tid;
+    double radius;
+
+    printf("Enter radius: ");
+    scanf("%lf", &radius);
+
+    pthread_create(&tid, NULL, circle_area_thread, &radius);
+    pthread_join(tid, NULL);
+
+    return 0;
+}
+```
+# 70. Find average of given array.
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#define MAX 100
+
+int a[MAX];
+
+void *average(void *arg){
+        int n=*(int *)arg;
+        float sum=0;
+        for(int i=0;i<n;i++){
+                sum+=a[i];
+        }
+        float *f=malloc(sizeof(float));
+        *f=sum/n;
+        return f;
+}
+int main(){
+        int n;
+        printf("Enter array size:(<%d): ",MAX);
+        scanf("%d",&n);
+        if(n<0 || n>MAX){
+                printf("Enter array size between 1 to %d\n",MAX);
+                return 1;
+        }
+
+
+        printf("Enter array elements: ");
+        for(int i=0;i<n;i++){
+                scanf("%d",&a[i]);
+        }
+
+        pthread_t t1;
+
+        if(pthread_create(&t1,NULL,average,&n)!=0){
+                perror("Failed thread.\n");
+                exit(1);
+        }
+
+        float *f;
+        pthread_join(t1,(void **)&f);
+
+        printf("Average of array: %.2f\n",*f);
+        free(f);
+}
+```
+# 71. Print Factorial of number
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+
+
+void *factorial(void *c){
+        int *fact=malloc(sizeof(long int));
+        *fact=1;
+        int n=*(int*)c;
+        while(n!=0){
+                *fact=*fact*n;
+                n--;
+        }
+        return fact;
+}
+
+int main(){
+        pthread_t ti;
+        int n;
+        printf("Enter Number: ");
+        scanf("%d",&n);
+        if(pthread_create(&ti,NULL,factorial,&n)!=0){
+                perror("Failed to create.\n");
+                exit(1);
+        }
+        int *fact;
+        pthread_join(ti,(void**)&fact);
+        printf("Factorial of %d is: %d\n",n,*fact);
+}
+
+```
+# 72. Develop a C program to create a thread that prints the English alphabet in uppercase?
+## Source Code
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+void *print_uppercase(void *arg) {
+    printf("Uppercase Alphabets:\n");
+    for (char ch = 'A'; ch <= 'Z'; ch++) {
+        printf("%c ", ch);
+    }
+    printf("\n");
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t thread;
+    if (pthread_create(&thread, NULL, print_uppercase, NULL) != 0) {
+        perror("Thread creation failed");
+        exit(1);
+    }
+    pthread_join(thread, NULL);
+    return 0;
+}
+```
+# 73. Given Number is perfect square or not
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<pthread.h>
+#include<math.h>
+void *perfect(void *arg){
+        long int n=*(long int*)arg;
+
+        long int i=sqrt(n);
+                if(i*i==n){
+                        printf("%ld is Perfect square.\n",n);
+                        return NULL;
+                }
+
+        printf("%ld is not perfect square.\n",n);
+        return NULL;
+}
+
+int main(){
+        long int per;
+        printf("Enter number: ");
+        scanf("%ld",&per);
+
+        pthread_t t1;
+
+        if(pthread_create(&t1,NULL,perfect,&per)!=0){
+                perror("Failed.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+}
+```
+
+# 74. Create thread that checks if a given number is divisible by another given number or not.
+## Source Code
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+struct numbers {
+    int num;
+    int div;
+};
+
+void *check_divisible(void *arg) {
+    struct numbers *data = (struct numbers *)arg;
+    if (data->div == 0) {
+        printf("Division by zero is not allowed.\n");
+    } else if (data->num % data->div == 0) {
+        printf("%d is divisible by %d\n", data->num, data->div);
+    } else {
+        printf("%d is not divisible by %d\n", data->num, data->div);
+    }
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t thread;
+    struct numbers input;
+
+    printf("Enter number: ");
+    scanf("%d", &input.num);
+
+    printf("Enter divisor: ");
+    scanf("%d", &input.div);
+
+    if (pthread_create(&thread, NULL, check_divisible, &input) != 0) {
+        perror("Thread creation failed");
+        exit(1);
+    }
+
+    pthread_join(thread, NULL);
+    return 0;
+}
+```
+# 75. Create thread that printf the multiplication table of a given number upto given limit.
+## Source Code
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+struct table {
+    int num;
+    int limit;
+};
+
+void *print_table(void *arg) {
+    struct table *data = (struct table *)arg;
+    printf("Multiplication table of %d up to %d:\n", data->num, data->limit);
+    for (int i = 1; i <= data->limit; i++) {
+        printf("%d x %d = %d\n", data->num, i, data->num * i);
+    }
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t thread;
+    struct table input;
+
+    printf("Enter number: ");
+    scanf("%d", &input.num);
+
+    printf("Enter limit: ");
+    scanf("%d", &input.limit);
+
+    if (pthread_create(&thread, NULL, print_table, &input) != 0) {
+        perror("Thread creation failed");
+        exit(1);
+    }
+
+    pthread_join(thread, NULL);
+    return 0;
+}
+```
