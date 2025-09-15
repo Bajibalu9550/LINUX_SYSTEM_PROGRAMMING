@@ -2562,58 +2562,71 @@ int main() {
 ## Source Code
 
 ```c
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#include<errno.h>
+#include<string.h>
 
 pthread_mutex_t lock;
 pthread_cond_t cond;
-int turn = 0; // 0 -> even's turn, 1 -> odd's turn
 
-void* printEven(void* arg) {
-    for (int i = 2; i <= 20; i += 2) {
-        pthread_mutex_lock(&lock);
-        while (turn != 0) {
-            pthread_cond_wait(&cond, &lock);
+int flag=1;
+
+
+void *even(void *arg){
+        for(int i=2;i<=20;i+=2){
+                pthread_mutex_lock(&lock);
+                while(flag!=0){
+                        pthread_cond_wait(&cond,&lock);
+                }
+                printf("%d ",i);
+                flag=1;
+                pthread_cond_signal(&cond);
+                pthread_mutex_unlock(&lock);
         }
-        printf("%d ", i);
-        turn = 1;
-        pthread_cond_signal(&cond);
-        pthread_mutex_unlock(&lock);
-    }
-    return NULL;
+        return NULL;
 }
-
-void* printOdd(void* arg) {
-    for (int i = 1; i < 20; i += 2) {
-        pthread_mutex_lock(&lock);
-        while (turn != 1) {
-            pthread_cond_wait(&cond, &lock);
+void *odd(void *arg){
+        for(int i=1;i<=20;i+=2){
+                pthread_mutex_lock(&lock);
+                while(flag!=1){
+                        pthread_cond_wait(&cond,&lock);
+                }
+                printf("%d ",i);
+                flag=0;
+                pthread_cond_signal(&cond);
+                pthread_mutex_unlock(&lock);
         }
-        printf("%d ", i);
-        turn = 0;
-        pthread_cond_signal(&cond);
-        pthread_mutex_unlock(&lock);
-    }
-    return NULL;
+        return NULL;
 }
 
-int main() {
-    pthread_t t1, t2;
 
-    pthread_mutex_init(&lock, NULL);
-    pthread_cond_init(&cond, NULL);
+int main(){
+        pthread_t t1,t2;
 
-    pthread_create(&t1, NULL, printEven, NULL);
-    pthread_create(&t2, NULL, printOdd, NULL);
+        pthread_mutex_init(&lock,NULL);
+        pthread_cond_init(&cond,NULL);
+        /*if(pthread_create(&t1,NULL,even,NULL)!=0){
+                printf("%s\n",strerror(errno));
+                exit(1);
+        }
+        */
 
-    pthread_join(t1, NULL);
-    pthread_join(t2, NULL);
+        if(pthread_create(&t2,NULL,odd,NULL)!=0){
+                printf("%s\n",strerror(errno));
+                exit(1);
+        }
+        if(pthread_create(&t1,NULL,even,NULL)!=0){
+                printf("%s\n",strerror(errno));
+                exit(1);
+        }
 
-    pthread_mutex_destroy(&lock);
-    pthread_cond_destroy(&cond);
+        pthread_join(t1,NULL);
+        pthread_join(t2,NULL);
 
-    printf("\n");
-    return 0;
+        pthread_cond_destroy(&cond);
+        pthread_mutex_destroy(&lock);
 }
+
 ```
