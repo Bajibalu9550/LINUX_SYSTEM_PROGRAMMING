@@ -2666,3 +2666,30 @@ int main() {
     return 0;
 }
 ```
+# 64. Crate thread to product of numbers from 1 to 5.
+## Source Code
+
+```c
+#include <stdio.h>
+#include <pthread.h>
+
+void *product_thread(void *arg) {
+    long long *prod = (long long *)arg;
+    *prod = 1;
+    for (int i = 1; i <= 5; i++) {
+        *prod *= i;
+    }
+    return NULL;
+}
+
+int main(void) {
+    pthread_t tid;
+    long long result = 0;
+
+    pthread_create(&tid, NULL, product_thread, &result);
+    pthread_join(tid, NULL);
+
+    printf("Product of numbers from 1 to 5 = %lld\n", result);
+    return 0;
+}
+```
