@@ -3137,3 +3137,91 @@ int main() {
     return 0;
 }
 ```
+
+# 77. Create two threads that increment and decrement a shared variable respectively, using mutex locks?
+## Source code
+```c
+ #include<stdio.h>
+#include<pthread.h>
+#include<stdlib.h>
+pthread_mutex_t lock;
+int glob=0;
+
+void *threadfun1(void *arg){
+        int loop,i,loc;
+        loop=*(int *)arg;
+        for(i=0;i<loop;i++){
+                pthread_mutex_lock(&lock);
+                loc=glob;
+                loc++;
+                glob=loc;
+                pthread_mutex_unlock(&lock);
+        }
+        return NULL;
+}
+
+void *threadfun2(void *arg){
+        int i,loc,loop=*(int *)arg;
+        for(i=0;i<loop;i++){
+                pthread_mutex_lock(&lock);
+                loc=glob;
+                loc--;
+                glob=loc;
+                pthread_mutex_unlock(&lock);
+        }
+        return NULL;
+}
+int main(){
+        pthread_t t1;
+        pthread_t t2;
+        int loop=1000;
+        int rev1;
+        //printf("Enter loop: ");
+        //scanf("%d",&loop);
+        pthread_create(&t1,NULL,threadfun1,&loop);
+        pthread_create(&t2,NULL,threadfun2,&loop);
+        pthread_join(t1,NULL);
+        pthread_join(t2,NULL);
+
+        printf("%d\n",glob);
+}
+
+```
+
+# 78. Create threaad that prints numbers from 10 to 1 in decrement order using mutex locks?
+## Source code
+```c
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+
+pthread_mutex_t lock;
+int num = 10;
+
+void* printNumbers(void* arg) {
+    while (num > 0) {
+        pthread_mutex_lock(&lock);
+        printf("%d\n", num);
+        num--;
+        pthread_mutex_unlock(&lock);
+        usleep(100000);
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t t1, t2;
+
+    pthread_mutex_init(&lock, NULL);
+
+    pthread_create(&t1, NULL, printNumbers, NULL);
+    pthread_create(&t2, NULL, printNumbers, NULL);
+
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+
+    pthread_mutex_destroy(&lock);
+
+    return 0;
+}
+```
