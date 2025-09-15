@@ -2188,3 +2188,60 @@ int main(){
         pthread_mutex_destroy(&lock);
 }
 ```
+# 55. Write a C Program to demonstrate thread synchronization using mutex locks. Create two threads that increment a shared variable using mutex to ensure proper synchronization?
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+
+int glob;
+pthread_mutex_t lock;
+void *threadfun1(void *arg){
+        int n=*(int *)arg;
+        for(int i=1;i<=n;i++){
+                pthread_mutex_lock(&lock);
+                int loc=glob;
+                loc++;
+                glob=loc;
+                pthread_mutex_unlock(&lock);
+        }
+        return NULL;
+}
+
+void *threadfun2(void *arg){
+        int n=*(int *)arg;
+        for(int i=1;i<=n;i++){
+                pthread_mutex_lock(&lock);
+                int loc=glob;
+                loc++;
+                glob=loc;
+                pthread_mutex_unlock(&lock);
+        }
+        return NULL;
+}
+
+
+int main(){
+        pthread_t t1,t2;
+        int loop=2000;
+
+        pthread_mutex_init(&lock,NULL);
+        if(pthread_create(&t1,NULL,threadfun1,&loop)!=0){
+                perror("Failed thread1.\n");
+                exit(1);
+        }
+
+        if(pthread_create(&t2,NULL,threadfun2,&loop)!=0){
+                perror("Failed thread2.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+        pthread_join(t2,NULL);
+
+        printf("glob: %d\n",glob);
+        pthread_mutex_destroy(&lock);
+}
+```
