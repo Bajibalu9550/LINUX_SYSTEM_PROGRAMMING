@@ -2245,3 +2245,64 @@ int main(){
         pthread_mutex_destroy(&lock);
 }
 ```
+
+# 56. Extend the previous program to use semaphore insted of mutex locks for thread synchronization?
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#include<semaphore.h>
+int glob;
+sem_t lock;
+void *threadfun1(void *arg){
+        int n=*(int *)arg;
+        for(int i=1;i<=n;i++){
+                sem_wait(&lock);
+                int loc=glob;
+                loc++;
+                glob=loc;
+                sem_post(&lock);
+        }
+        return NULL;
+}
+
+void *threadfun2(void *arg){
+        int n=*(int *)arg;
+        for(int i=1;i<=n;i++){
+                sem_wait(&lock);
+                int loc=glob;
+                loc++;
+                glob=loc;
+                sem_post(&lock);
+        }
+        return NULL;
+}
+
+
+int main(){
+        pthread_t t1,t2;
+        int loop=2000;
+
+        if(sem_init(&lock,0,1)!=0){
+                perror("Semaphore init failed.\n");
+                exit(1);
+        }
+        if(pthread_create(&t1,NULL,threadfun1,&loop)!=0){
+                perror("Failed thread1.\n");
+                exit(1);
+        }
+
+        if(pthread_create(&t2,NULL,threadfun2,&loop)!=0){
+                perror("Failed thread2.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+        pthread_join(t2,NULL);
+
+        printf("glob: %d\n",glob);
+        sem_destroy(&lock);
+}
+```
