@@ -2088,3 +2088,48 @@ int main(){
          free(len);
 }
 ```
+# 53. Write a program tp create two threads using pthreadslibrary each thread should print "Hello World!" along with its threead ID?.
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#define ch "Hello World!"
+
+pthread_mutex_t lock;
+void *threadfun1(void *arg){
+
+        pthread_mutex_lock(&lock);
+        printf("Thread 1: %s and My ID: %lu\n",ch,(unsigned long)pthread_self());
+        pthread_mutex_unlock(&lock);
+        return NULL;
+}
+
+void *threadfun2(void *arg){
+        pthread_mutex_lock(&lock);
+
+        printf("Thread 2: %s and my ID: %lu\n",ch,(unsigned long)pthread_self());
+
+        pthread_mutex_unlock(&lock);
+
+        return NULL;
+}
+
+int main(){
+        pthread_t t1,t2;
+        if(pthread_create(&t1,NULL,threadfun1,NULL)!=0){
+                perror("Failed thread1.\n");
+                exit(1);
+        }
+
+        if(pthread_create(&t2,NULL,threadfun2,NULL)!=0){
+                perror("Failed thread2.\n");
+                exit(1);
+        }
+
+        pthread_join(t1,NULL);
+        pthread_join(t2,NULL);
+}
+
+```
