@@ -2385,3 +2385,107 @@ int main(){
         pthread_cond_destroy(&no_full);
         pthread_cond_destroy(&no_empty);
 }
+```
+# 58. Implement a multithreaded file copy program in C. Create multiple threads to read from one file and write another file concurrently?
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<pthread.h>
+#include<unistd.h>
+
+#define threads 4
+typedef struct {
+        int sfd;
+        int dfd;
+        int start;
+        int size;
+}Node;
+
+
+void *threadfun(void *arg){
+
+        Node *data=(Node *)arg;
+
+        char buffer[1024];
+
+        long int byte_left=data->size;
+        long int offset=data->start;
+
+        while(byte_left > 0){
+                long int bytes_to_read=(byte_left>1024)?1024:byte_left;
+
+                long int bytes_read=pread(data->sfd,buffer,bytes_to_read,offset);
+                if(bytes_read<0)
+                        break;
+
+                long int bytes_write=pwrite(data->dfd,buffer,bytes_read,offset);
+                if(bytes_write != bytes_read){
+                        printf("Write error.\n");
+                        break;
+                }
+
+                byte_left-=bytes_to_read;
+                offset+=bytes_to_read;
+        }
+        return NULL;
+}
+int main(int argc,char *argv[]){
+        if(argc!=3){
+                printf("Usage: %s <source file> <destination file>\n",argv[0]);
+
+                return 1;
+        }
+
+        int fd1=open(argv[1],O_RDONLY);
+
+        if(fd1<0){
+                printf("Open source file error.\n");
+                exit(1);
+        }
+
+        int fd2=open(argv[2], O_WRONLY | O_CREAT | O_TRUNC ,0640);
+
+        if(fd2<0){
+                printf("Open destination file error.\n");
+                close(fd1);
+                return 1;
+        }
+
+        long int size=lseek(fd1,0,SEEK_END);
+
+        lseek(fd1,0,SEEK_SET);
+
+        int chunk=size/threads;
+        int extra=size%threads;
+
+        pthread_t t[threads];
+        Node node[threads];
+
+        for(int i=0;i<threads;i++){
+                node[i].sfd=fd1;
+                node[i].dfd=fd2;
+                node[i].start=i*chunk;
+                node[i].size=chunk;
+
+                if(i==threads-1){
+
+                        node[i].size+=extra;
+                }
+
+                pthread_create(&t[i],NULL,threadfun,&node[i]);
+        }
+        for(int i=0;i<threads;i++){
+                pthread_join(t[i],NULL);
+        }
+
+
+
+        close(fd1);
+        close(fd2);
+
+        printf("File Copied successfully.\n");
+}
+```
