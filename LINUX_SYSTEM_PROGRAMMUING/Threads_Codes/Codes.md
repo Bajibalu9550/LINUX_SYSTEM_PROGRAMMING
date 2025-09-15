@@ -2558,3 +2558,62 @@ int main() {
     return 0;
 }
 ```
+# 62. Develop a C program to create two threads that print odd and even numbers alternately?
+## Source Code
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+pthread_mutex_t lock;
+pthread_cond_t cond;
+int turn = 0; // 0 -> even's turn, 1 -> odd's turn
+
+void* printEven(void* arg) {
+    for (int i = 2; i <= 20; i += 2) {
+        pthread_mutex_lock(&lock);
+        while (turn != 0) {
+            pthread_cond_wait(&cond, &lock);
+        }
+        printf("%d ", i);
+        turn = 1;
+        pthread_cond_signal(&cond);
+        pthread_mutex_unlock(&lock);
+    }
+    return NULL;
+}
+
+void* printOdd(void* arg) {
+    for (int i = 1; i < 20; i += 2) {
+        pthread_mutex_lock(&lock);
+        while (turn != 1) {
+            pthread_cond_wait(&cond, &lock);
+        }
+        printf("%d ", i);
+        turn = 0;
+        pthread_cond_signal(&cond);
+        pthread_mutex_unlock(&lock);
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t t1, t2;
+
+    pthread_mutex_init(&lock, NULL);
+    pthread_cond_init(&cond, NULL);
+
+    pthread_create(&t1, NULL, printEven, NULL);
+    pthread_create(&t2, NULL, printOdd, NULL);
+
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+
+    pthread_mutex_destroy(&lock);
+    pthread_cond_destroy(&cond);
+
+    printf("\n");
+    return 0;
+}
+```
