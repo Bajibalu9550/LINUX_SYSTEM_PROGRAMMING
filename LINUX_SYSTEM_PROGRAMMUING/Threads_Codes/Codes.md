@@ -2489,3 +2489,39 @@ int main(int argc,char *argv[]){
         printf("File Copied successfully.\n");
 }
 ```
+# 59. Write a C program to demonstrate thread cancellation. Create a thread that runs an infinite loop and cancels it after a certain condition is met from the main thread?
+## Source Code
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#include<unistd.h>
+void *threadfun(void*arg){
+        printf("Thread function starts:\n");
+
+        while(1){
+                printf("Thread 1 executing.\n");
+                sleep(1);
+                //pthread_testcancel();
+        }
+
+
+        return NULL;
+}
+
+int main(){
+        pthread_t t1;
+        if(pthread_create(&t1,NULL,threadfun,NULL)!=0){
+
+                perror("failed thread create.\n");
+                return 1;
+        }
+
+        sleep(5);
+
+        pthread_cancel(t1);
+        pthread_join(t1,NULL);
+        printf("Thread execution completed.\n");
+}
+```
