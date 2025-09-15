@@ -3110,3 +3110,30 @@ int main() {
     return 0;
 }
 ```
+# 76. Create thread that print current system time.
+## Source code
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <time.h>
+
+void *print_time(void *arg) {
+    time_t t;
+    time(&t);
+    printf("Current time: %s", ctime(&t));
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t thread;
+
+    if (pthread_create(&thread, NULL, print_time, NULL) != 0) {
+        perror("Thread creation failed");
+        exit(1);
+    }
+
+    pthread_join(thread, NULL);
+    return 0;
+}
+```
