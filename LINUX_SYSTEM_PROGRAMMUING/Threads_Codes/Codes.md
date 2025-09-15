@@ -2630,3 +2630,39 @@ int main(){
 }
 
 ```
+
+# 63. Sum of squares from 1 to 10
+## Source Code
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+void* sumOfSquares(void* arg) {
+    int sum = 0;
+    for (int i = 1; i <= 10; i++) {
+        sum += i * i;
+    }
+    int *result = malloc(sizeof(int));
+    *result = sum;
+    pthread_exit(result);
+}
+
+int main() {
+    pthread_t tid;
+    int *res;
+
+    if (pthread_create(&tid, NULL, sumOfSquares, NULL) != 0) {
+        perror("Thread creation failed");
+        exit(1);
+    }
+
+    pthread_join(tid, (void**)&res);
+
+    printf("Sum of squares from 1 to 10 = %d\n", *res);
+
+    free(res);
+    return 0;
+}
+```
