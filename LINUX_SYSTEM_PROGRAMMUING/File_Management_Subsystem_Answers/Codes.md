@@ -301,6 +301,49 @@ int main() {
 # 8. C Program: Copy a File from One Directory to Another  
 
 ```c
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<unistd.h>
+
+int main(int args,char *argv[]){
+
+        if(args!=3){
+                printf("Enter <source file path> <Destination file path>.\n");
+                return 1;
+        }
+
+        int sfd=open(argv[1],O_RDONLY);
+        if(sfd<0){
+                perror("Failed source open().\n");
+                return 1;
+        }
+
+        int dfd=open(argv[2],O_WRONLY | O_CREAT,0640);
+        if(dfd<0){
+                perror("Failed dest open().\n");
+                close(sfd);
+                return 1;
+        }
+
+        char ch[1024];
+        int bytes_read=0,bytes_write=0;
+
+        while((bytes_read=read(sfd,ch,1024))!=0){
+                bytes_write=write(dfd,ch,bytes_read);
+                if(bytes_read != bytes_write){
+                        printf("Error in written to file.\n");
+                        close(sfd);
+                        close(dfd);
+                        return 1;
+                }
+        }
+        printf("File moved successfully.\n");
+        close(sfd);
+        close(dfd);
+}
+--------------------------------------------------------------------
 #include <stdio.h>
 #include <stdlib.h>
 
