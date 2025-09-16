@@ -3225,3 +3225,251 @@ int main() {
     return 0;
 }
 ```
+
+# 79. Why we are using pthread_create insted of clone() for creating threads?
+```c
+
+--> Because the arguments of clone() system call is complex and need alot undestandig
+
+```
+# 80. Why stack grouns.
+```c
+1. When a function invoke a block of memory created in stack  is called stack frame.
+2. Whenever we create a new thread a block of memory creates in stack is called stack area. Within stack area there is a stack frames also, because thread even calls some other function inside it.
+```
+
+# 81. What segments are shared by multiple threads within a process?
+```c
+    Shared segments are: 1. Text segments
+                          2. Data segments
+                          3. BSS Segment
+                           4. Heap segment
+     But stack segment is not shared.
+```
+
+# 82. Can you  fetch the thread entry point return value in your main thread?
+```c
+--> Yes, it can be found in the second argument of the pthread_join()
+```
+
+# 83. What happend when main function is invkoed by CPU?
+
+```c
+Memory got created in RAM (i.e, memory segment + PCB)
+
+- In arm architecture, the function invokation or subroutine invokation get tranalated to BL(Branching and linking) assembly code.
+
+        BL main
+
+- The function name gives the base address of the function and base address gives funnction corresponding 1st instruction base address and it get copied to the program counter. 
+```
+
+# 84. What happen when cpu stop execution?
+```c
+- Once the cpu time expires, backup of all the CPU register info has to copied to some locations in your RAM. i.e, Context area.
+- Context area present in PCB
+- During context switching, the contents of cpu register copied to context area of PCB 
+```
+
+# 85. During context switching, whuch instriction will be used to copy contents of cpu register to your context area of pcb?
+
+```c
+- STR(store) instruction
+```
+
+# 86. How do you create separate process?
+```c
+- by using fork() system call
+```
+
+# 87. How do server create separate thread?
+
+```c
+- By using pthread_t library call
+- Server has to decide whether he wants to create separate thread or separate process.
+```
+# 88. Advantage of thread over process?
+
+```c
+1. Creation of thread consume less space i.e, stack area of 2MB but creation of process consumes alot of memory i.e, some where takes 4GB of virtual memory or it depends on upon execution.
+
+2. Thread creation is 10 times faster than the process creation and process creation is slower compared to thread.
+
+3. Sharing informatio between threads is fast but sharing information between processes need ipc mechanism.
+4. Context switching between thread is faster compared to process and context switching between process is slower than threads.
+```
+
+# 89. Advantage pf process over thread?
+
+```c
+1. Multiple process accesing same moery there can updation issues or synchronization issues but it can be avoided.
+
+  When multiple threads try to share information present in segments they encounter synchronisation or updation issues
+```
+
+# 90. How do you overcome this updation or syncronization issue. when multiple threads are trying to access global vaariable?
+
+```c
+- By using synchrinisation techniques and it iss given below:
+    1. Mutex lock
+    2. Conditional variables
+```
+
+# 91. How much cpu time is given to user space thread and kernel space thread?
+
+```c
+- The kernel thread gets cpu time equal to that of normal process.
+```
+
+# 92. Explain POSIX and system-v difference?
+
+```c
+POSIX:
+
+1. It is easy
+2. It has more option
+3. They are library calls
+
+System-v:
+
+1. It is complex
+2. It has less options
+3. They are system calls
+```
+
+# 93. What are the points to remember when mutex locks are used to protect the critical section?
+
+```c
+1. Same mutex locks should be used in all threads
+2. Mutex locks are never to be created locally they should created globally
+    Let us assume mutex locks of same name is created locally inside some thread function despite     of same name separate stack frame is created in stack area which will completely different        from others. so same name does not ensure globally. 
+3. A separate mutex locks have to be used if another global variable has to be protected.
+```
+# 94. By using mutex_lock what you are acheiving?
+
+```c
+1. We are resolving the updation or synchronisarion issue.
+2. If the first thread is accessing the critical section then at the same time other thread should not access the same critical section.
+```
+# 95.Difference between mutex locks and semaphore?
+
+```c
+Mutex locks:
+
+1. Counter associated with mutex locks can have either 0 or 1.
+2. To protect access to global memory | global data | global resource between multiple threads we need mutex locks
+3. Only the owner of the lock can unlock it.
+
+Saemaphpre:
+
+1. Counter associated with saemaphore can have 0 or any positive valus.
+2.To protect access to sahred memory between multile process we can use saemaohore.
+3. Even other can unlock the lock.
+
+
+```
+
+# 96. Explain the variants of pthread_mutex_lock?
+
+```c
+  There are three varients of pthread_mutex_lock and they are:
+    1. pthread_mutex_lock()
+    2. pthread_mutex_trylock()
+    3. pthread_mutex_timedlock()
+
+1. pthread_mutex_lock()
+
+    - Changes the state from unlocked to locked  1->0
+    - Block indefinetly until it state is changed by the owner. i.e, locked->unloked
+
+2. pthread_mutex_trylock()
+
+    - Change the state from unlocked -> locked
+    - Pthread_mutex_trylock() will not block, when the state is locked or couter is 0 but it             returns an error message -EBUSY, which means state is locked.
+
+3. pthread_mutex_timedlock()
+
+    - Change the state from unlocked -> locked i.e, counter 1 -> 0
+    - It will block only for a specific time period memtioned as 2nd arguments.
+
+```
+
+# 97. How to create a thread?
+
+```c
+- by usind pthread_create() libdrary call
+```
+
+# 98. Explain the compilation of thread?
+
+```c
+1. Compiler by default has only access to lib.c or c-standard library function. the compiler will not have any access to other libraries
+2. Compiler can access to other library only when we provide some information about the compilation. the information passed is library name, the actual name used library name is "so" name is just lbirary name. Here so means shared object
+```
+# 99. What are the arguments of pthread_create()?
+
+```c
+
+main(){
+pthread_t t;
+pthread_create(&t,NULL,threadfun,"......");
+
+pthread_t is a typedef of unsigned int it is not typedef of signed int
+
+1st Argument (&t):
+
+- it is base address of variable which is type of pthread_t. Initially it is empty.
+
+2nd Argument:(i.e, NULL):  It is for flags.
+
+3rd Argument:(threadfun):
+
+- This argument indicates the entry point of the function for threads entry point function we need to follow standard formate.
+
+- The entry point must accept only one arguments
+
+void *threadfun(void  *arg){
+------
+------
+}
+
+Note:
+We need vpid pointer because it is a generic pointer and it can accepting any data type.
+
+
+4th argument:
+
+- Here we can pass ay base address
+
+    1. Base address of normal variable (int / char)
+    2.Base address of structure variable
+    3. Base address of normal arrays
+    4. Base address of structural arrays
+    5. Base address of string
+
+- We can pass anything here, whatever is passed as an argument here is passed as an argument to thread entry point. so from here we are passing the base address to 3rd argument . thus the argument of threadfun is of pointer type to hold the address
+
+```
+
+# 100. Explain the return value of a thread?
+```c
+The return value of thread is stored in the 2nd argumet of the pthread_join()  which is type of void pointer 
+```
+# 101. Explain the working of pthread_mutex_trylock()?
+```c
+1. They are used in testing scinerio.
+2. They are also used for checking how long does 2nd thread can block the 1st thread i.e, counter of -EBUSY
+```
+# 102. Explain the application of pthread_mutex_timedlock()?
+
+```c
+1. They are used in testing seinerio.
+
+- suppose the time mentioned in pthread)mutex_timedlock() of 2nd thread funtion is 100ms then within that time 1st thread should unlock the mutex. If the unlocking does not happend then pthread_mutex_timedloc() will return an error of ETIMEOUT. Once the error is obtained then skip the execution of critical section.
+```
+
+# 103. What is mutex exclusion?
+
+```c
+Memory has multiple thread and at a time only one thread is access critical section or global section. If the  time of one thread expires then other threads are allowed.
+```
