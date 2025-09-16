@@ -210,6 +210,31 @@ int main() {
     else
         printf("File deletion failed.\n");
 }
+----------------------------------------------------
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<unistd.h>
+
+int main(){
+        char file[20];
+        printf("Enter filename: ");
+        scanf("%s",file);
+
+        int fd=open(file,O_RDONLY);
+        if(fd>0){
+                if(remove(file)==0){
+                        printf("File removed successfully.\n");
+                }
+                else {
+                        printf("Error at remove.\n");
+                }
+        }
+        else {
+                printf("File does not exist.\n");
+        }
+}
+
 ```
 # 7. C Program: Copy Content from One File to Another  
 
