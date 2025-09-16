@@ -74,11 +74,10 @@ int main() {
 
     fclose(fp);
 }
-
-
-
---------------------------------------------------------------------
-
+```
+# 2. Open existing file and disply its contents
+## Source code
+```c
 
 #include<stdio.h>
 #include<unistd.h>
