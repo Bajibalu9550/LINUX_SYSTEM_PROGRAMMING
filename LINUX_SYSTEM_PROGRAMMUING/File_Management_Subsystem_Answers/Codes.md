@@ -1006,6 +1006,50 @@ int main() {
 
     return 0;
 }
+-----------------------------------------------------------------------------------------
+#include<stdio.h>
+#include<fcntl.h>
+#include<stdlib.h>
+#include<string.h>
+#include<unistd.h>
+#include<errno.h>
+int main(){
+        char csv[20];
+        printf("Enter csv file name: ");
+        scanf("%s",csv);
+
+        int fd=open(csv,O_RDWR | O_CREAT|O_APPEND,0640);
+        if(fd<0){
+                printf("%s\n",strerror(errno));
+                return 1;
+        }
+
+        char str[1024];
+        while(1){
+               write(1,"Enter Text: ",12);
+
+               int n=read(0,str,1023);
+               if(n<=0){
+                       printf("read\n");
+                       break;
+               }
+               str[n]='\0';
+               str[strlen(str)-1]='\0';
+
+
+               if(strcmp(str,"exit")==0){
+                       break;
+               }
+               strcat(str,"\n");
+
+               if(write(fd,str,strlen(str))<0){
+                       printf("write");
+                       break;
+               }
+        }
+        close(fd);
+}
+
 ```
 # 24. C Program to Get the Absolute Path of the Current Working Directory
 
