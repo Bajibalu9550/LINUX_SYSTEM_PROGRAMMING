@@ -1271,3 +1271,56 @@ int main(){
 }
 
 ```
+# 33. Write a C program to create a new empty file named "empty.txt"?
+
+```c
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main() {
+    int fd;
+    fd = open("empty.txt", O_CREAT | O_WRONLY | O_TRUNC, 0644);
+
+    if (fd < 0) {
+        perror("Failed to create file");
+        return 1;
+    }
+
+    printf("File 'empty.txt' created successfully.\n");
+    close(fd);
+    return 0;
+}
+
+```
+# 34. Develop a C program to get the permissions (mode) of a file named "file.txt"?
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/stat.h>
+
+int main(){
+
+        char file[200];
+        printf("Enter file name: ");
+        scanf("%s",file);
+
+        struct stat st;
+
+        lstat(file,&st);
+
+        printf((S_ISDIR(st.st_mode))?"d":"-");
+        printf((st.st_mode & S_IRUSR)?"r":"-");
+        printf((st.st_mode & S_IWUSR)?"w":"-");
+        printf((st.st_mode & S_IXUSR)?"x":"-");
+        printf((st.st_mode & S_IRGRP)?"r":"-");
+        printf((st.st_mode & S_IWGRP)?"w":"-");
+        printf((st.st_mode & S_IXGRP)?"x":"-");
+        printf((st.st_mode & S_IROTH)?"r":"-");
+        printf((st.st_mode & S_IWOTH)?"w":"-");
+        printf((st.st_mode & S_IXOTH)?"x":"-");
+}
+
+
+```
