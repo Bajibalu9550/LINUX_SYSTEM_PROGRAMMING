@@ -1224,6 +1224,50 @@ int main(){
 }
 
 ```
+# 32. Implement a C program to get the file type (regular file, directory, symbolic link, etc.) of a given path?
 
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/stat.h>
+#include<unistd.h>
 
+int main(){
+        /*char path[200];
+        printf("Enter path: ");
+        scanf("%s",path);
+        */
 
+        char *path="/home/Balu/Documents/Linux_Progrmming/File_Management_Subsystem/Basic_io_calls/myfifoo";
+
+        struct stat st;
+
+        lstat(path,&st);
+
+        if(S_ISREG(st.st_mode)){
+                printf("Regular file.\n");
+        }
+        else if(S_ISDIR(st.st_mode)){
+                printf("Directory.\n");
+        }
+        else if(S_ISLNK(st.st_mode)){
+                printf("symbolic link.\n");
+        }
+        else if(S_ISFIFO(st.st_mode)){
+                printf("Fifo file.\n");
+        }
+        else if(S_ISCHR(st.st_mode)){
+                printf("Character device.\n");
+        }
+        else if(S_ISBLK(st.st_mode)){
+                printf("Block device.\n");
+        }
+        else if(S_ISSOCK(st.st_mode)){
+                printf("Socket.\n");
+        }
+        else {
+                printf("Unkown file.\n");
+        }
+}
+
+```
