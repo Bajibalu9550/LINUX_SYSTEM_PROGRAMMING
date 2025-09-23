@@ -1324,3 +1324,38 @@ int main(){
 
 
 ```
+# 36. Write a C program to read and display the first 10 lines of a file named "log.txt"?
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<unistd.h>
+
+int main(){
+        char file[200];
+        printf("Enter file name: ");
+        scanf("%s",file);
+
+        int fd=open(file,O_RDONLY);
+        if(fd<0){
+                perror("open");
+                return 1;
+        }
+        char str[1024];
+        int n,linecount=0;
+        while((n=read(fd,str,1024))>0){
+                for(int i=0;i<n;i++){
+                        write(1,&str[i],1);
+                        if(str[i]=='\n'){
+                                linecount++;
+                                if(linecount==10){
+                                        close(fd);
+                                        return 1;
+                                }
+                        }
+                }
+        }
+}
+
+```
