@@ -1123,11 +1123,107 @@ int main() {
 }
 ```
 
+# 30. Write a C program to truncate a file named "file.txt" to a specified length?
 
+## Source code
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
 
+int main(){
+        char file[30];
+        printf("Enter file name: ");
+        scanf("%s",file);
 
+        int n;
+        printf("Enter size to truncate: ");
+        scanf("%d",&n);
 
+        if(truncate(file,n)==-1){
+                perror("truncate.\n");
+                return 1;
+        }
+        printf("Successfully truncated\n");
+}
 
+```
+# 31. Develop a C program to search for a specific string in a file named "data.txt" and display the line number(s) where it occurs?
+
+```c
+#include<stdio.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<string.h>
+#include<stdlib.h>
+
+int main(){
+        char file[30];
+        printf("Enter file name: ");
+        scanf("%s",file);
+
+        int fd=open(file,O_RDONLY);
+        if(fd<0){
+                perror("open");
+                return 1;
+        }
+
+        struct stat st;
+        fstat(fd,&st);
+
+        int size=st.st_size;
+
+        printf("Size of file: %d\n",size);
+
+        char sub[30];
+        printf("Enter string to search: ");
+        scanf("%s",sub);
+
+        char *str=malloc(size +1);
+        if(str==NULL){
+                printf("Memory allocation failed.\n");
+                return 1;
+        }
+
+        int n,line=1;
+        n=read(fd,str,size);
+        if(n<0){
+                perror("read");
+                free(str);
+                close(fd);
+                return 1;
+        }
+
+        str[n]='\0';
+        int match=0;
+        int m=strlen(sub);
+        for(int i=0;i<=n-m;i++){
+                int j,found=1;
+                for(j=0;j<m;j++){
+                        if(str[i+j] != sub[j]){
+                                found=0;
+                                break;
+                        }
+                }
+                if(found){
+                        printf("String found at line: %d\n",line);
+                        match=1;
+
+                }
+                if(str[i]=='\n'){
+                        line++;
+                }
+
+        }
+        if(!match){
+                printf("String is not present in given file\n");
+        }
+        free(str);
+        close(fd);
+}
+
+```
 
 
 
