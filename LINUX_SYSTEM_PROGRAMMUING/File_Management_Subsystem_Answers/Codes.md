@@ -1359,3 +1359,74 @@ int main(){
 }
 
 ```
+
+# 37. Develop a C program to read data from a text file named "input.txt" and write it to another file named "output.txt" in reverse order?
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<unistd.h>
+#include<sys/stat.h>
+
+
+void reverse(char *str,int s,int e){
+        while(s<e){
+                char temp=str[s];
+                str[s]=str[e];
+                str[e]=temp;
+                s++;
+                e--;
+        }
+}
+int main(){
+        char source[200];
+        printf("Enter source file name: ");
+        scanf("%s",source);
+
+        char dest[200];
+        printf("Enter destination file name: ");
+        scanf("%s",dest);
+
+        int sfd=open(source,O_RDONLY);
+        int dfd=open(dest,O_WRONLY | O_CREAT|O_TRUNC, 0640);
+        if(sfd<0 || dfd<0){
+                perror("open");
+                return 1;
+        }
+
+        struct stat st;
+
+        if(fstat(sfd,&st)==-1){
+                perror("fstat");
+                close(sfd);
+                close(dfd);
+                return 1;
+        }
+        int size=st.st_size;
+
+        char *str=malloc(size +1);
+        if(str==NULL){
+                printf("Memory allocation failed.\n");
+                return 1;
+        }
+
+        int n=read(sfd,str,size);
+        if(n<0){
+                perror("read");
+                free(str);
+                close(sfd);
+                close(dfd);
+                return 1;
+        }
+
+        reverse(str,0,n-2);
+
+        write(dfd,str,n);
+
+        free(str);
+        close(sfd);
+        close(dfd);
+}
+
+```
