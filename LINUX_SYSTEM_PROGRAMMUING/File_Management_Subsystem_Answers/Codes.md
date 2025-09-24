@@ -1430,3 +1430,35 @@ int main(){
 }
 
 ```
+# 38. Implement a C program to create a new directory named with the current date in the format "YYYY-MM-DD"?
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<time.h>
+#include<errno.h>
+#include<dirent.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+
+int main(){
+        long int t;
+        struct  tm *time_info;
+        time(&t);
+        time_info=localtime(&t);
+        char directory[200];
+        strftime(directory,sizeof(directory),"%Y-%m-%d",time_info);
+        if(mkdir(directory,0755)==-1){
+                if(errno==EEXIST){
+                        printf("Directory is already present.\n");
+                }
+                else{
+                        printf("Failed to create directory.\n");
+                        return 1;
+                }
+        }
+        else {
+                printf("Directory '%s' is created successfully.\n",directory);
+        }
+}
+```
