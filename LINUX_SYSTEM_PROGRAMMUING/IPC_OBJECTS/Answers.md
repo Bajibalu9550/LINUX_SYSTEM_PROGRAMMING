@@ -537,6 +537,56 @@ If no data is available → read() blocks the process and puts it in the sleep s
 | **-1**       | **Error occurred** — check `errno` for details.                                                        |
 
 
+
+# 61. Create a multithreaded program where threads synchronize using semaphore sets.
+```c
+
+#include<stdio.h>
+#include<unistd.h>
+#include<semaphore.h>
+#include<stdlib.h>
+#include<pthread.h>
+#define Threads 5
+int glob;
+sem_t sem;
+
+
+void *threadfun(void *arg){
+        int n=*(int *)arg;
+
+        printf("Thread %d is waiting to enter critical section: glob= %d........\n",n,glob);
+
+        sem_wait(&sem);
+        glob++;
+        printf("Thread %d is entered into critical section: glob= %d........\n",n,glob);
+        sleep(1);
+        sem_post(&sem);
+
+        return NULL;
+}
+
+int main(){
+        pthread_t t[Threads];
+        int ids[Threads];
+
+        sem_init(&sem,0,1);
+
+        for(int i=0;i<Threads;i++){
+                ids[i]=i+1;
+                pthread_create(&t[i],NULL,threadfun,&ids[i]);
+        }
+
+        for(int i=0;i<Threads;i++){
+                pthread_join(t[i],NULL);
+        }
+
+        sem_destroy(&sem);
+
+        printf("After completion of all threads execution: glob= %d....\n",glob);
+}
+
+```
+
 # 65. Write a program where multiple processes compete for access to a critical section using semaphores to ensure mutual exclusion.
 ```c
 #include<stdio.h>
