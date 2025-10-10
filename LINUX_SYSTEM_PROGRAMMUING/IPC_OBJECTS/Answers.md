@@ -648,3 +648,69 @@ int main(){
 }
 
 ```
+# 67. Implement a program where multiple child processes are created, and each child process communicates with the parent process using pipes.
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<string.h>
+#include<sys/wait.h>
+int main(){
+        int k;
+        printf("Enter number of child processs to create: ");
+        scanf("%d",&k);
+
+        int fds[k][2];
+
+        for(int i=0;i<k;i++){
+                if(pipe(fds[i])==-1){
+                        perror("pipe");
+                        exit(EXIT_FAILURE);
+                }
+        }
+
+        for(int i=0;i<k;i++){
+                int pid=fork();
+                if(pid<0){
+                        perror("fork");
+                        exit(EXIT_FAILURE);
+                }
+
+                if(pid==0){
+                        close(fds[i][0]);
+
+                        char str[1024];
+                        sprintf(str,"This is child %d with PID: %d\n",i+1,getpid());
+
+                        write(fds[i][1],str,strlen(str));
+
+                        close(fds[i][1]);
+                        exit(0);
+                }
+        }
+
+        for(int i=0;i<k;i++){
+                close(fds[i][1]);
+        }
+
+        printf("\nParent Process reading msg from all chilldrens.\n");
+
+        char read1[1024];
+
+        for(int i=0;i<k;i++){
+                int n=read(fds[i][0],read1,sizeof(read1)-1);
+                if(n>0){
+                        read1[n]='\0';
+                        printf("Parent received: %s\n",read1);
+                }
+
+                close(fds[i][0]);
+        }
+
+        for(int i=0;i<k;i++){
+                wait(NULL);
+        }
+}
+
+```
