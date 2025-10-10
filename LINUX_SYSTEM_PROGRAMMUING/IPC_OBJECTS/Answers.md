@@ -714,3 +714,66 @@ int main(){
 }
 
 ```
+# 68. Develop a program that uses pipes for bidirectional communication between two processes, where each process can send and receive messages.
+
+```c
+
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<string.h>
+int main(){
+        int p2c[2];
+        int c2p[2];
+        if(pipe(p2c)==-1 || pipe(c2p)==-1){
+                perror("pipe");
+                exit(EXIT_FAILURE);
+        }
+
+        int pid=fork();
+
+        if(pid<0){
+                perror("fork");
+                exit(EXIT_FAILURE);
+        }
+        else if(pid==0){
+                close(p2c[1]);
+                close(c2p[0]);
+
+                char str[1024];
+                int n=read(p2c[0],str,sizeof(str)-1);
+                str[n]='\0';
+                printf("Child recevied from parent: %s\n",str);
+
+
+                printf("Child Process: Enter data to send parent: ");
+                fgets(str,sizeof(str),stdin);
+                str[strlen(str)-1]='\0';
+                write(c2p[1],str,strlen(str));
+
+                close(c2p[1]);
+                close(p2c[0]);
+        }
+        else if (pid >0){
+                close(p2c[0]);
+                close(c2p[1]);
+
+                char write1[1024];
+                printf("Parent process: Enter data to send child: ");
+                fgets(write1,sizeof(write1),stdin);
+                write1[strlen(write1)-1]='\0';
+                write(p2c[1],write1,strlen(write1));
+
+
+                printf("Parent process: Received from the child: ");
+                int j=read(c2p[0],write1,sizeof(write1)-1);
+                write1[j]='\0';
+
+                printf("%s\n",write1);
+
+                close(p2c[1]);
+                close(c2p[0]);
+        }
+}
+
+```
