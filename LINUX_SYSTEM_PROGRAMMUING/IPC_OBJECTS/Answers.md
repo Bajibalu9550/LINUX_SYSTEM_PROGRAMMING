@@ -535,3 +535,116 @@ If no data is available → read() blocks the process and puts it in the sleep s
 | **> 0**      | Number of **bytes actually read** and copied into the buffer. Can be **less than the requested size**. |
 | **0**        | **End-of-File (EOF)** reached — no more data to read.                                                  |
 | **-1**       | **Error occurred** — check `errno` for details.                                                        |
+
+
+# 65. Write a program where multiple processes compete for access to a critical section using semaphores to ensure mutual exclusion.
+```c
+#include<stdio.h>
+#include<semaphore.h>
+#include<sys/wait.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<fcntl.h>
+int main(){
+        sem_t *sem;
+        sem=sem_open("mysem",O_CREAT | O_EXCL,0640,1);
+        if(sem == SEM_FAILED){
+                perror("sem_open");
+                exit(EXIT_FAILURE);
+        }
+        printf("Semaphores Created Successfully.\n");
+
+        for(int i=0;i<3;i++){
+                int pid=fork();
+                if(pid<0){
+                        perror("fork");
+                        exit(EXIT_FAILURE);
+                }
+                else if(pid==0){
+                        printf("Child %d waiting to enter critical section....\n",getpid());
+                        sem_wait(sem);
+                        printf("Child %d entered critical section.....\n",getpid());
+                        sleep(2);
+                        printf("Child %d leaving critical section.......\n",getpid());
+                        sem_post(sem);
+                        exit(0);
+                }
+
+        }
+        printf("Parent %d waiting to enter critical section....\n",getpid());
+
+        sem_wait(sem);
+        printf("Parent %d entered critical section...\n",getpid());
+        sleep(2);
+        printf("Parent %d leving critical section.......\n",getpid());
+        sem_post(sem);
+
+        for(int i=0;i<3;i++){
+                wait(NULL);
+        }
+
+        sem_close(sem);
+        sem_unlink("mysem");
+
+        printf("All process finished. semaphore removed.\n");
+}
+
+```
+# 66.Write a C program to create a pipe and pass an array of integers from the parentprocess to the child process through the pipe.
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+int main(){
+        int fds[2];
+
+        if(pipe(fds)==-1){
+                perror("pipe");
+                exit(EXIT_FAILURE);
+        }
+
+        int pid=fork();
+        if(pid<0){
+                perror("fork");
+                exit(EXIT_FAILURE);
+        }
+        else if(pid > 0){
+                close(fds[0]);
+                write(1,"This is Parent process.\n",sizeof("This is Parent process.\n"));
+                int n;
+                printf("Enter array size: ");
+                scanf("%d",&n);
+
+                int a[n];
+                printf("Enter array elements: ");
+                for(int i=0;i<n;i++){
+                        scanf("%d",&a[i]);
+                }
+
+                write(fds[1],&n,sizeof(int));
+                write(fds[1],a,sizeof(a));
+
+                close(fds[1]);
+        }
+        else if(pid==0){
+                close(fds[1]);
+
+                int n;
+                read(fds[0],&n,sizeof(int));
+
+                int arr[n];
+                read(fds[0],arr,sizeof(arr));
+
+                printf("Child process Received from Parent: ");
+
+                for(int i=0;i<n;i++){
+                        printf("%d ",arr[i]);
+
+                }
+                printf("\n");
+
+                close(fds[0]);
+        }
+}
+
+```
