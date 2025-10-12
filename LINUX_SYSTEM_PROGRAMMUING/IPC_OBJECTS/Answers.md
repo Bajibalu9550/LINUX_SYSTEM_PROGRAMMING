@@ -827,3 +827,94 @@ int main(){
 }
 
 ```
+# 69. Create a C program where multiple processes write data to a named pipe, and another process reads from the named pipe and displays the received data.
+
+### Server.c
+```c
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<sys/stat.h>
+#include<fcntl.h>
+int main(){
+        char *file="myfifo69";
+        if(access(file,F_OK)==-1){
+                if(mkfifo(file,0640)==-1){
+                        perror("mkfifo");
+                        exit(EXIT_FAILURE);
+                }
+        }
+
+        int fd=open(file,O_RDONLY);
+        if(fd==-1){
+                perror("open");
+                exit(EXIT_FAILURE);
+        }
+        char buffer[1024];
+        printf("Server starts reading.\n");
+        while(1){
+                int n=read(fd,buffer,sizeof(buffer)-1);
+                if(n>0){
+                        buffer[n]='\0';
+                        printf("Server received: %s\n",buffer);
+                }
+                else if(n==0){
+                        printf("No more data.\n");
+                        break;
+                }
+                else {
+                        perror("read");
+                        break;
+                }
+        }
+
+        close(fd);
+}
+
+```
+### Client.c
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<string.h>
+#include<fcntl.h>
+#include<sys/wait.h>
+#include<sys/stat.h>
+int main(){
+        char *file="myfifo69";
+        if(access(file,F_OK)==-1){
+                if(mkfifo(file,0640)==-1){
+                        perror("mkfifo");
+                        exit(EXIT_FAILURE);
+                }
+        }
+        char str[1024];
+        for(int i=0;i<3;i++){
+                int id=fork();
+                if(id<0){
+                        perror("fork");
+                        break;
+                }
+                if(id==0){
+                        int fd=open(file,O_WRONLY);
+                        if(fd==-1){
+                                perror("open");
+                                exit(EXIT_FAILURE);
+                        }
+                        fgets(str,sizeof(str),stdin);
+                        str[strlen(str)-1]='\0';
+
+                        write(fd,str,strlen(str));
+                        printf("Writer %d sent data to pipe.\n",getpid());
+                        close(fd);
+                        exit(0);
+                }
+        }
+        for(int i=0;i<3;i++){
+                wait(NULL);
+        }
+        return 0;
+}
+```
