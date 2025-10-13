@@ -918,3 +918,207 @@ int main(){
         return 0;
 }
 ```
+# 70. Implement a program where two processes exchange messages through a named pipe until a termination signal is received.
+
+```c
+#include<stdio.h>
+#include<sys/wait.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<sys/stat.h>
+#include<fcntl.h>
+#include<string.h>
+int main(){
+        char *fifo1="myfifo1";
+        char *fifo2="myfifo2";
+
+        if(access(fifo1,F_OK)==-1){
+                if(mkfifo(fifo1,0640)==-1){
+                        perror("mkfifo1");
+                        exit(EXIT_FAILURE);
+                }
+        }
+
+        if(access(fifo2,F_OK)==-1){
+                if(mkfifo(fifo2,0640)==-1){
+                        perror("mkfifo2");
+                        exit(EXIT_FAILURE);
+                }
+        }
+
+        int pid=fork();
+
+        if(pid<0){
+                perror("fork");
+                exit(EXIT_FAILURE);
+        }
+
+        if(pid==0){
+                char send[1024];
+                int f_read1,f_write;
+                while(1){
+
+                         f_write=open(fifo1,O_WRONLY);
+                         f_read1=open(fifo2,O_RDONLY);
+                        printf("Child: Enter msg to send parent: ");
+                        fgets(send,sizeof(send),stdin);
+                        send[strlen(send)-1]='\0';
+
+                        write(f_write,send,strlen(send));
+
+                        if(strcmp(send,"exit")==0){
+                                close(f_write);
+                                close(f_read1);
+                                break;
+                        }
+
+
+                        int k=read(f_read1,send,sizeof(send)-1);
+                        if(k>0){
+                                send[k]='\0';
+                                printf("Child: Received from parent: %s\n",send);
+                                if(strcmp(send,"exit")==0){
+                                        printf("Child: Received termination signal.\n");
+                                        close(f_write);
+                                        close(f_read1);
+                                        break;
+                                }
+                        }
+                }
+                close(f_write);
+                close(f_read1);
+                exit(0);
+
+        }
+        else {
+                char receive[1024];
+                int f_read,f_write;
+                while(1){
+                         f_read=open(fifo1,O_RDONLY);
+                         f_write=open(fifo2,O_WRONLY);
+                        int n=read(f_read,receive,sizeof(receive)-1);
+                        if(n>0){
+                                receive[n]='\0';
+                                printf("Parent: Received from child: %s\n",receive);
+                                if(strcmp(receive,"exit")==0){
+                                        printf("Parent: Child ended the chat.\n");
+                                        close(f_read);
+                                        close(f_write);
+                                        break;
+                                }
+                        }
+
+                        printf("Parent: Enter msg to send child: ");
+                        fgets(receive,sizeof(receive),stdin);
+                        receive[strlen(receive)-1]='\0';
+                        write(f_write,receive,strlen(receive));
+                        if(strcmp(receive,"exit")==0){
+                                printf("Parent: Exiting chat.\n");
+                                close(f_read);
+                                close(f_write);
+                                break;
+                        }
+                }
+                        close(f_read);
+                        close(f_write);
+                        wait(NULL);
+
+
+
+        }
+}
+
+```
+# 71. Develop a C program that acts as a server, continuously reading requests from a named pipe, and a client program that sends requests to the server through the same named pipe
+
+### Client
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<unistd.h>
+#include<string.h>
+int main(){
+        char *file="myfifo71";
+        if(access(file,F_OK)==-1){
+                printf("Server fifl not present.\n");
+                exit(EXIT_FAILURE);
+        }
+
+        int fd;
+        char buffer[1024];
+        printf("Client started to write data into fifo.\n");
+        while(1){
+                fd=open(file,O_WRONLY);
+                if(fd<0){
+                        perror("open");
+                        exit(EXIT_FAILURE);
+                }
+
+                printf("Client: Enter msg into fifo: ");
+                fgets(buffer,sizeof(buffer),stdin);
+                buffer[strlen(buffer)-1]='\0';
+
+                write(fd,buffer,strlen(buffer));
+                close(fd);
+                if(strcmp(buffer,"exit")==0){
+
+                        printf("Client shutting down.\n");
+                        break;
+                }
+                //close(fd);
+
+        }
+}
+
+```
+
+### Server
+
+```c
+
+#include<stdio.h>
+#include<sys/stat.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<unistd.h>
+#include<string.h>
+int main(){
+        char *file="myfifo71";
+
+        if(access(file,F_OK)==-1){
+                if(mkfifo(file,0640)==-1){
+                        perror("mkfifo");
+                        exit(EXIT_FAILURE);
+                }
+        }
+        int fd;
+
+        char buffer[1024];
+        printf("Server started waiting for message.\n");
+        while(1){
+                fd=open(file,O_RDONLY);
+                if(fd<0){
+                        perror("open");
+                        exit(EXIT_FAILURE);
+                }
+
+                int n=read(fd,buffer,sizeof(buffer)-1);
+                if(n>0){
+                        buffer[n]='\0';
+                        printf("Server read: %s\n",buffer);
+
+                        if(strcmp(buffer,"exit")==0){
+                                printf("Server shutting down.\n");
+                                break;
+                        }
+
+                }
+                close(fd);
+        }
+        unlink(file);
+}
+
+```
