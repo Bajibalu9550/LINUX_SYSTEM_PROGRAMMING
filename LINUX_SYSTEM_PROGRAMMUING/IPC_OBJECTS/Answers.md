@@ -538,6 +538,58 @@ If no data is available → read() blocks the process and puts it in the sleep s
 
 
 
+
+# 41. Implement a program that uses pipes for communication between a parent and child process. Show how data can be passed between processes using pipes.
+
+```c
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<string.h>
+int main(){
+        int fds[2];
+
+        if(pipe(fds)==-1){
+                perror("pipe");
+                exit(EXIT_FAILURE);
+        }
+
+        int pid=fork();
+
+        if(pid<0){
+                perror("fork");
+                exit(EXIT_FAILURE);
+        }
+
+        if(pid==0){
+                close(fds[1]);
+
+                char str[1024];
+                int n=read(fds[0],str,sizeof(str));
+                if(n>0){
+                        str[n]='\0';
+                        printf("Child: Received: %s\n",str);
+                }
+
+                close(fds[0]);
+        }
+        else {
+                close(fds[0]);
+
+                char str[1024];
+                printf("Parent: Enter msg: ");
+                fgets(str,sizeof(str),stdin);
+                str[strlen(str)-1]='\0';
+
+                write(fds[1],str,strlen(str));
+
+                close(fds[1]);
+                wait(NULL);
+        }
+}
+
+```
+
 # 61. Create a multithreaded program where threads synchronize using semaphore sets.
 ```c
 
