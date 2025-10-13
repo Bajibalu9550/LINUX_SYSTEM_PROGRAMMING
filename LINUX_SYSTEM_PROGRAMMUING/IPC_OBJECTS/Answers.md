@@ -652,6 +652,152 @@ int main(){
 
 ```
 
+# 43. Implement a program that uses Named pipes for communication between two processes.
+
+### Between two processes
+```c
+
+#include<stdlib.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<string.h>
+#include<sys/stat.h>
+#include<sys/wait.h>
+int main(){
+        char *file="myfifo42";
+
+        if(access(file,F_OK)==-1){
+                if(mkfifo(file,0640)==-1){
+                        perror("mkfifo");
+                        exit(EXIT_FAILURE);
+                }
+        }
+
+        int pid=fork();
+
+        if(pid<0){
+                perror("fork");
+                exit(EXIT_FAILURE);
+        }
+
+        if(pid==0){
+                int fd=open(file,O_RDONLY);
+                if(fd<0){
+                        perror("open");
+                        exit(EXIT_FAILURE);
+                }
+
+                char str[1024];
+                int n=read(fd,str,sizeof(str)-1);
+                str[n]='\0';
+
+                printf("Child: Read from fifo: %s\n",str);
+
+                close(fd);
+        }
+        else {
+                int fd=open(file,O_WRONLY);
+                if(fd<0){
+                        perror("open");
+                        exit(EXIT_FAILURE);
+                }
+
+                char str[1024];
+                printf("Parent: Enter msg into fifo: ");
+                fgets(str,sizeof(str),stdin);
+                str[strlen(str)-1]='\0';
+
+                write(fd,str,strlen(str));
+
+                close(fd);
+                wait(NULL);
+        }
+
+        unlink(file);
+}
+
+```
+### Between Unrelated Process   server.c
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<unistd.h>
+#include<errno.h>
+#include<string.h>
+#include<sys/stat.h>
+int main(){
+        char buffer[1024];
+        char fifo[20];
+        printf("Enter FIFO name: ");
+        scanf("%s",fifo);
+        if(mkfifo(fifo,0666)==-1){
+                if(errno != EEXIST){
+                        perror("mkfifo");
+                        return 1;
+                }
+        }
+
+        printf("Server started. Waiting for messages...\n");
+
+        while(1){
+                int fd=open(fifo,O_RDONLY);
+                if(fd==-1){
+                        perror("open");
+                        return 1;
+                }
+
+                int n=read(fd,buffer,sizeof(buffer)-1);
+
+                if(n>0){
+                        buffer[n]='\0';
+                        printf("server Received: %s\n",buffer);
+                }
+                close(fd);
+        }
+}
+
+```
+### Client.c
+
+```c
+#include<string.h>
+#include<stdio.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<errno.h>
+#include<sys/stat.h>
+
+int main(){
+        char message[1024];
+        char file[20];
+        printf("Enter FIFO name: ");
+        scanf("%s",file);
+        getchar();
+        if(access(file,F_OK)==-1){
+                printf("FIFO  not found, creating one...\n");
+                if(mkfifo(file,0666)==-1){
+                        perror("mkfifo");
+                        return 1;
+                }
+        }
+
+        int fd=open(file,O_WRONLY);
+        if(fd==-1){
+                perror("open");
+                return 1;
+        }
+
+        printf("Enter message to send to server: ");
+        fgets(message,sizeof(message),stdin);
+        message[strlen(message)-1]='\0';
+        write(fd,message,strlen(message));
+        printf("Client sent: %s\n",message);
+
+        close(fd);
+}
+
+```
 # 61. Create a multithreaded program where threads synchronize using semaphore sets.
 ```c
 
