@@ -590,6 +590,68 @@ int main(){
 
 ```
 
+# 42. Create a program where two processes communicate synchronously using pipes. Ensure that one process waits for the other to finish before proceeding.
+
+```c
+#include<stdio.h>
+#include<unistd.h>
+#include<errno.h>
+#include<string.h>
+
+int main(){
+        int p2c[2],c2p[2];
+
+        if(pipe(p2c)==-1 || pipe(c2p)==-1){
+                printf("Error at pipe: %s\n",strerror(errno));
+                return 1;
+        }
+
+        int pid=fork();
+
+        if(pid<0){
+                printf("Error at fork: %s\n",strerror(errno));
+                return 1;
+        }
+        else if(pid>0){
+                close(p2c[0]);
+                close(c2p[1]);
+                char write_data[1024];
+                printf("This is parent: Enter msg to send child: ");
+                fgets(write_data,sizeof(write_data),stdin);
+                write_data[strlen(write_data)-1]='\0';
+                write(p2c[1],write_data,strlen(write_data));
+
+                char receive[1024];
+                int n=read(c2p[0],receive,sizeof(receive));
+                receive[n]='\0';
+                printf("Parent received from child: %s\n",receive);
+                close(p2c[1]);
+                close(c2p[0]);
+        }
+        else if(pid==0){
+                close(p2c[1]);
+                close(c2p[0]);
+
+                char read_data[1024];
+                int k=read(p2c[0],read_data,sizeof(read_data));
+                read_data[k]='\0';
+                printf("Child received from parent: %s\n",read_data);
+
+                char reply[1024];
+                printf("This is child enter msg to send parent: ");
+                fgets(reply,sizeof(reply),stdin);
+                reply[strlen(reply)-1]='\0';
+                write(c2p[1],reply,strlen(reply));
+
+                close(p2c[0]);
+                close(c2p[1]);
+
+                wait(NULL);
+        }
+}
+
+```
+
 # 61. Create a multithreaded program where threads synchronize using semaphore sets.
 ```c
 
