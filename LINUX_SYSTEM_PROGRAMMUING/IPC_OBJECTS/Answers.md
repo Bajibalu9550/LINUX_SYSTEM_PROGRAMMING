@@ -798,6 +798,102 @@ int main(){
 }
 
 ```
+
+# 47. Design a multithreaded program where threads communicate through named pipes.
+```c
+
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#include<fcntl.h>
+#include<unistd.h>
+#include<string.h>
+#include<sys/stat.h>
+
+#define file "myfifo47"
+void *thread_read(void *arg){
+
+        int fd;
+        char str[1024];
+        while(1){
+                fd=open(file,O_RDONLY);
+                if(fd<0){
+                        perror("open");
+                        exit(EXIT_FAILURE);
+                }
+
+                int n=read(fd,str,sizeof(str)-1);
+                if(n>0){
+                        str[n]='\0';
+                        printf("Thread_read: Reads from fifo: %s\n",str);
+                        if(strcmp(str,"exit")==0){
+                                printf("Thread_read shutting down.\n");
+                                close(fd);
+                                break;
+                        }
+
+                }
+                close(fd);
+        }
+        pthread_exit(NULL);
+}
+
+void *thread_write(void *arg){
+        int fd;
+        char buffer[1024];
+
+        while(1){
+                fd=open(file,O_WRONLY);
+                if(fd<0){
+                        perror("open");
+                        exit(EXIT_FAILURE);
+                }
+
+                printf("Thread write: Enter msg: ");
+                fgets(buffer,sizeof(buffer),stdin);
+                buffer[strlen(buffer)-1]='\0';
+
+                write(fd,buffer,strlen(buffer));
+
+                if(strcmp(buffer,"exit")==0){
+                        printf("thread_write shutting down.\n");
+                        close(fd);
+                        break;
+                }
+                close(fd);
+        }
+        pthread_exit(NULL);
+}
+int main(){
+        //char *file="myfifo47";
+        if(access(file,F_OK)==-1){
+                if(mkfifo(file,0640)==-1){
+                        perror("mkfifo");
+                        exit(EXIT_FAILURE);
+                }
+        }
+
+        pthread_t reader,writer;
+
+        if(pthread_create(&reader,NULL,thread_read,NULL)==-1){
+                perror("Thread1");
+                exit(EXIT_FAILURE);
+        }
+        sleep(1);
+
+        if(pthread_create(&writer,NULL,thread_write,NULL)==-1){
+                perror("Thread2");
+                exit(EXIT_FAILURE);
+        }
+
+        pthread_join(reader,NULL);
+        pthread_join(writer,NULL);
+
+        unlink(file);
+}
+
+```
 # 61. Create a multithreaded program where threads synchronize using semaphore sets.
 ```c
 
