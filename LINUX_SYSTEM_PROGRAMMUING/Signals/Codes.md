@@ -206,3 +206,36 @@ int main(){
 }
 
 ```
+# 7. Implement a program to handle the SIGSEGV signal (segmentation fault).
+````c
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+
+// Signal handler for SIGSEGV
+void segfault_handler(int signo) {
+    printf("\nCaught signal %d (Segmentation Fault)\n", signo);
+    printf("Segmentation fault detected! Exiting gracefully.\n");
+    exit(EXIT_FAILURE);
+}
+
+int main() {
+    // Register the signal handler
+    if (signal(SIGSEGV, segfault_handler) == SIG_ERR) {
+        perror("signal");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("This program will cause a segmentation fault.\n");
+
+    // Deliberately cause a segmentation fault
+    int *ptr = NULL;
+    printf("Value at ptr: %d\n", *ptr);  // Dereferencing NULL causes SIGSEGV
+
+    printf("This line will not be executed.\n");
+
+    return 0;
+}
+
+````
