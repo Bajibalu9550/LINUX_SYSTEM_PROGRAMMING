@@ -81,3 +81,128 @@ int main(){
 }
 
 ```
+# 3. Create a C program to ignore the SIGCHLD signal temporarily.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+
+int main() {
+    pid_t pid;
+
+    printf("Parent process PID: %d\n", getpid());
+
+    // Step 1: Ignore SIGCHLD
+    printf("Temporarily ignoring SIGCHLD...\n");
+    signal(SIGCHLD, SIG_IGN);
+
+    pid = fork();
+    if (pid < 0) {
+        perror("fork failed");
+        exit(EXIT_FAILURE);
+    } else if (pid == 0) {
+        // Child process
+        printf("Child process (PID: %d) started.\n", getpid());
+        sleep(2);
+        printf("Child process (PID: %d) exiting.\n", getpid());
+        exit(0);
+    } else {
+        // Parent process
+        printf("Parent waiting while ignoring SIGCHLD...\n");
+        sleep(4);
+
+        // Step 2: Restore default signal handling
+        printf("\nRestoring default SIGCHLD behavior.\n");
+        signal(SIGCHLD, SIG_DFL);
+
+        // Create another child after restoring default behavior
+        pid = fork();
+        if (pid == 0) {
+            printf("New child process (PID: %d) started.\n", getpid());
+            sleep(2);
+            printf("New child process (PID: %d) exiting.\n", getpid());
+            exit(0);
+        } else {
+            // Wait for child termination normally
+            wait(NULL);
+            printf("Parent reaped the new child process.\n");
+        }
+    }
+
+    printf("Parent process exiting.\n");
+    return 0;
+}
+
+```
+# 5. Implement a C program to handle the SIGALRM signal using sigaction().
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<signal.h>
+#include<unistd.h>
+void alarm_handler(int signo){
+        printf("Caught sig{SIGALRM): %d\n",signo);
+        printf("Alarm signal handled successfully.\n");
+        exit(1);
+}
+int main(){
+
+        struct sigaction st;
+
+        st.sa_handler=alarm_handler;
+        st.sa_flags=0;
+        sigemptyset(&st.sa_mask);
+
+        if(sigaction(SIGALRM,&st,NULL)==-1){
+                perror("sigaction");
+                exit(EXIT_FAILURE);
+        }
+
+        printf("Setting alarm for 5 seconds.\n");
+        alarm(5);
+
+        printf("Waiting for alarm signal.\n");
+        while(1){
+                //pause();
+                printf("Running...\n");
+                sleep(1);
+        }
+}
+
+
+```
+# 6. Write a C program to install a custom signal handler for SIGTERM?
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<signal.h>
+#include<unistd.h>
+
+void handler(int signo){
+        printf("Caught sig: %d\n",signo);
+
+        sleep(1);
+        exit(0);
+
+}
+int main(){
+        struct sigaction act;
+
+        act.sa_handler=handler;
+        act.sa_flags=0;
+        sigemptyset(&act.sa_mask);
+
+        if(sigaction(SIGTERM,&act,NULL)==-1){
+                perror("sigaction");
+                exit(EXIT_FAILURE);
+        }
+        printf("Waiting for signal(SIGTERM): ");
+
+        while(1){
+                printf("Running..\n");
+                sleep(1);
+        }
+}
+
+```
