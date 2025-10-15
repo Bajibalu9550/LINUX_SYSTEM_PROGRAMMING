@@ -798,7 +798,166 @@ int main(){
 }
 
 ```
+# 44. Write a C program to create a message queue using the msgget system call. Ensure that the program checks for errors during the creation process.
 
+```c
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/types.h>
+#include<sys/msg.h>
+
+int main(){
+        int key=ftok("progfile",65);
+        if(key==-1){
+                perror("ftok");
+                exit(EXIT_FAILURE);
+        }
+
+        int msgid=msgget(key,IPC_CREAT|0640);
+        if(msgid==-1){
+                perror("msgget");
+                exit(EXIT_FAILURE);
+        }
+
+        printf("Message queue created successfully.\n");
+        printf("KEY : %d\n",key);
+}
+
+```
+# 45. Develop two separate C programs, one for sending messages and the other for receiving messages through a created message queue.
+
+### Server.c(Sender)
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/types.h>
+#include<sys/msg.h>
+#include<sys/ipc.h>
+#include<string.h>
+struct msg_buffer{
+        long mtype;
+        char txmsg[100];
+};
+int main(){
+        struct msg_buffer message;
+        int key=ftok("msg45",65);
+        if(key==-1){
+                perror("ftok");
+                exit(EXIT_FAILURE);
+        }
+
+
+        int msgid=msgget(key,IPC_CREAT|0666);
+        if(msgid==-1){
+                perror("megget");
+                exit(EXIT_FAILURE);
+        }
+
+        message.mtype = 1;
+        printf("Enter string to send: ");
+        fgets(message.txmsg,sizeof(message.txmsg),stdin);
+        //message.txmsg[strlen(message.txmsg)-1]='\0';
+        int len=strlen(message.txmsg);
+        if(len>0 && message.txmsg[len-1]=='\n'){
+                message.txmsg[len-1]='\0';
+        }
+
+        if(msgsnd(msgid,&message,sizeof(message.txmsg),0)==-1){
+                perror("msgsnd");
+                exit(EXIT_FAILURE);
+        }
+        printf("Message sent successfully.\n");
+
+
+}
+
+```
+
+### Client.c(Receiver)
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<sys/types.h>
+#include<sys/msg.h>
+#include<sys/ipc.h>
+struct msg_buffer{
+        long mtype;
+        char txmsg[100];
+};
+int main(){
+        struct msg_buffer message;
+        int key=ftok("msg45",65);
+        if(key==-1){
+                perror("ftok");
+                exit(EXIT_FAILURE);
+        }
+
+        int msgid=msgget(key,IPC_CREAT|0666);
+        if(msgid==-1){
+                perror("msgget");
+                exit(EXIT_FAILURE);
+        }
+
+        if(msgrcv(msgid,&message,sizeof(message.txmsg),1,0)==-1){
+                perror("msgrcv");
+                exit(EXIT_FAILURE);
+        }
+        printf("Received message; %s\n",message.txmsg);
+
+        if(msgctl(msgid,IPC_RMID,NULL)==-1){
+                perror("msgctl");
+                exit(EXIT_FAILURE);
+        }
+}
+
+
+```
+# 46. Create a program to remove an existing message queue using the msgctl system call. Ensure that the program prompts the user for confirmation before deleting the message queue.
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/msg.h>
+#include<sys/ipc.h>
+struct msg_buffer{
+        long mtype;
+        char msg[100];
+};
+int main(){
+        int key=ftok("msg46",65);
+        if(key==-1){
+                perror("ftok");
+                exit(EXIT_FAILURE);
+        }
+
+        int msgid=msgget(key,0666|IPC_CREAT);
+        if(msgid==-1){
+                perror("msgget");
+                exit(EXIT_FAILURE);
+        }
+
+        char choice;
+        printf("Message queue found: key = %d and msgid = %d\n",key,msgid);
+        printf("Do you want really remove msg queue (y/n)? :");
+        scanf("%c",&choice);
+
+        if(choice == 'y' || choice == 'Y'){
+                if(msgctl(msgid,IPC_RMID,0)==-1){
+                        perror("msgctl");
+                        exit(EXIT_FAILURE);
+                }
+                else {
+                        printf("Message queue removed successfully.\n");
+                }
+        }
+        else {
+                printf("Message queue is not removed.\n");
+        }
+}
+
+```
 # 47. Design a multithreaded program where threads communicate through named pipes.
 ```c
 
@@ -891,6 +1050,178 @@ int main(){
         pthread_join(writer,NULL);
 
         unlink(file);
+}
+
+```
+# 48. Write a C program where two processes communicate using message queues. Implement sending and receiving messages between the processes using msgget, msgsnd, and msgrcv.
+### Sender
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/types.h>
+#include<sys/msg.h>
+#include<sys/ipc.h>
+#include<string.h>
+struct msg_buffer{
+        long mtype;
+        char txmsg[100];
+};
+int main(){
+        struct msg_buffer message;
+        int key=ftok("msg45",65);
+        if(key==-1){
+                perror("ftok");
+                exit(EXIT_FAILURE);
+        }
+
+
+        int msgid=msgget(key,IPC_CREAT|0666);
+        if(msgid==-1){
+                perror("megget");
+                exit(EXIT_FAILURE);
+        }
+
+        message.mtype = 1;
+        printf("Enter string to send: ");
+        fgets(message.txmsg,sizeof(message.txmsg),stdin);
+        //message.txmsg[strlen(message.txmsg)-1]='\0';
+        int len=strlen(message.txmsg);
+        if(len>0 && message.txmsg[len-1]=='\n'){
+                message.txmsg[len-1]='\0';
+        }
+
+        if(msgsnd(msgid,&message,sizeof(message.txmsg),0)==-1){
+                perror("msgsnd");
+                exit(EXIT_FAILURE);
+        }
+        printf("Message sent successfully.\n");
+
+
+}
+```
+
+### Reciever
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<sys/types.h>
+#include<sys/msg.h>
+#include<sys/ipc.h>
+struct msg_buffer{
+        long mtype;
+        char txmsg[100];
+};
+int main(){
+        struct msg_buffer message;
+        int key=ftok("msg45",65);
+        if(key==-1){
+                perror("ftok");
+                exit(EXIT_FAILURE);
+        }
+
+        int msgid=msgget(key,IPC_CREAT|0666);
+        if(msgid==-1){
+                perror("msgget");
+                exit(EXIT_FAILURE);
+        }
+
+        if(msgrcv(msgid,&message,sizeof(message.txmsg),1,0)==-1){
+                perror("msgrcv");
+                exit(EXIT_FAILURE);
+        }
+        printf("Received message; %s\n",message.txmsg);
+
+        if(msgctl(msgid,IPC_RMID,NULL)==-1){
+                perror("msgctl");
+                exit(EXIT_FAILURE);
+        }
+}
+
+
+```
+
+# 49. Implement a program where two processes communicate synchronously using message queues. Ensure that one process waits for the other to finish before proceeding.
+
+```c
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/msg.h>
+#include<sys/ipc.h>
+#include<unistd.h>
+#include<string.h>
+struct msg_buffer{
+        long mtype;
+        char msg[100];
+};
+int main(){
+        int key=ftok("msg49",65);
+        if(key==-1){
+                perror("ftok");
+                exit(EXIT_FAILURE);
+        }
+
+        int msgid= msgget(key,0666|IPC_CREAT);
+        if(msgid==-1){
+                perror("msgget");
+                exit(EXIT_FAILURE);
+        }
+
+        int pid=fork();
+        if(pid<0){
+                perror("fork");
+                exit(EXIT_FAILURE);
+        }
+
+        if(pid>0){
+                struct msg_buffer message;
+                message.mtype=1;
+
+                printf("Parent: Enetr msg to send: ");
+                fgets(message.msg,sizeof(message.msg),stdin);
+                message.msg[strlen(message.msg)-1]='\0';
+
+                if(msgsnd(msgid,&message,sizeof(message.msg),0)==-1){
+                        perror("msgsnd");
+                        exit(EXIT_FAILURE);
+                }
+                printf("Message send successfully to child.\n");
+
+                if(msgrcv(msgid,&message,sizeof(message.msg),2,0)==-1){
+                        perror("msgrcv");
+                        exit(EXIT_FAILURE);
+                }
+                printf("Parent: %s\n",message.msg);
+
+                if(msgctl(msgid,IPC_RMID,0)==-1){
+                        perror("msgctl");
+                        exit(EXIT_FAILURE);
+                }
+
+
+        }
+
+        else {
+                struct msg_buffer message;
+
+                if(msgrcv(msgid,&message,sizeof(message.msg),1,0)==-1){
+                        perror("msgrcv");
+                        exit(EXIT_FAILURE);
+                }
+                printf("Child: Received message from parent: %s\n",message.msg);
+
+                message.mtype=2;
+
+                strcpy(message.msg,"Child received your message.");
+                sleep(2);
+                if(msgsnd(msgid,&message,sizeof(message.msg),0)==-1){
+                        perror("msgsnd");
+                        exit(EXIT_FAILURE);
+                }
+                printf("Child: Reply sent to parent.\n");
+        }
 }
 
 ```
