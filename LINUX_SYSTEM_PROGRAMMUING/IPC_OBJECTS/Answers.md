@@ -1225,6 +1225,130 @@ int main(){
 }
 
 ```
+# 50. Design a program that uses a message queue for synchronization between multiple processes.
+### Sender
+```c
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<sys/msg.h>
+#include<sys/ipc.h>
+
+struct msg_buffer{
+        long mtype;
+        char msg[100];
+};
+
+int main(){
+        int key=ftok("msg50",65);
+        struct msg_buffer message;
+        if(key==-1){
+                perror("ftok");
+                exit(EXIT_FAILURE);
+        }
+
+        int msgid=msgget(key,0666|IPC_CREAT);
+        if(msgid==-1){
+                perror("msgget");
+                exit(EXIT_FAILURE);
+        }
+        message.mtype=1;
+        printf("Enter msg to send: ");
+        fgets(message.msg,sizeof(message.msg),stdin);
+        message.msg[strlen(message.msg)-1]='\0';
+
+        if(msgsnd(msgid,&message,sizeof(message.msg),0)==-1){
+                perror("msgsnd");
+                exit(EXIT_FAILURE);
+        }
+
+        printf("Message sent successfully.\n");
+}
+
+```
+
+### Receiver1
+```c
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<sys/msg.h>
+#include<sys/ipc.h>
+
+struct msg_buffer{
+        long mtype;
+        char msg[100];
+};
+
+int main(){
+        int key=ftok("msg50",65);
+        struct msg_buffer message;
+        if(key==-1){
+                perror("ftok");
+                exit(EXIT_FAILURE);
+        }
+
+        int msgid=msgget(key,0666|IPC_CREAT);
+        if(msgid==-1){
+                perror("msgget");
+                exit(EXIT_FAILURE);
+        }
+
+        if(msgrcv(msgid,&message,sizeof(message.msg),1,0)==-1){
+                perror("msgrcv");
+                exit(EXIT_FAILURE);
+        }
+
+        printf("Received msg : %s\n",message.msg);
+
+        message.mtype=2;
+
+        if(msgsnd(msgid,&message,sizeof(message.msg),0)==-1){
+                perror("msgsnd");
+                exit(EXIT_FAILURE);
+        }
+
+        printf("Msg send successfully to receiver2.\n");
+
+}
+
+```
+
+### Receiver 2
+```c
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<sys/msg.h>
+#include<sys/ipc.h>
+
+struct msg_buffer{
+        long mtype;
+        char msg[100];
+};
+
+int main(){
+        int key=ftok("msg50",65);
+        struct msg_buffer message;
+        if(key==-1){
+                perror("ftok");
+                exit(EXIT_FAILURE);
+        }
+
+        int msgid=msgget(key,0666|IPC_CREAT);
+        if(msgid==-1){
+                perror("msgget");
+                exit(EXIT_FAILURE);
+        }
+        if(msgrcv(msgid,&message,sizeof(message.msg),2,0)==-1){
+                perror("msgrcv");
+                exit(EXIT_FAILURE);
+        }
+
+        printf("Receiver2: Received msg: %s\n",message.msg);
+}
+
+```
 # 61. Create a multithreaded program where threads synchronize using semaphore sets.
 ```c
 
