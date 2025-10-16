@@ -537,7 +537,21 @@ If no data is available → read() blocks the process and puts it in the sleep s
 | **-1**       | **Error occurred** — check `errno` for details.                                                        |
 
 
+# 18. What is meant by message queue?
+```c
+A message queue is a communication mechanism used in Inter-Process Communication (IPC) to allow processes to send and receive messages in an organized and asynchronous manner.
 
+. Separate system calls are used for accessint message queues as compared to pipes and named pipes
+
+
+1. It acts as a buffer (queue) maintained by the kernel.
+
+2. The queue stores messages sent by one process until another process retrieves them.
+
+3. Each message queue is identified by a unique key (identifier).
+
+4. Communication can happen between any two or more unrelated processes.
+```
 
 # 41. Implement a program that uses pipes for communication between a parent and child process. Show how data can be passed between processes using pipes.
 
