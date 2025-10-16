@@ -239,3 +239,97 @@ int main() {
 }
 
 ````
+# 8. Create a program to handle the SIGILL signal (illegal instruction).
+```c
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<signal.h>
+#include<unistd.h>
+
+void handler(int signo){
+        printf("Caught the signal: %d (SIGILL).\n",signo);
+        exit(1);
+}
+int main(){
+        signal(SIGILL,handler);
+
+        printf("Perform illegal instruction.\n");
+
+        asm("ud2");
+        printf("This line will never execute.\n");
+}
+
+```
+# 9. Write a program to handle the SIGABRT signal (abort).
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+
+void handle_sigabrt(int signo) {
+    printf("Caught signal: %d (SIGABRT)\n", signo);
+    printf("Program aborted intentionally using abort().\n");
+    exit(1);
+}
+
+int main() {
+    signal(SIGABRT, handle_sigabrt);
+
+    printf("Before abort() call.\n");
+
+    abort();
+
+    printf("This line will not be executed.\n");
+    return 0;
+}
+
+
+```
+# 10. Implement a C program to handle the SIGQUIT signal.
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<signal.h>
+#include<unistd.h>
+void handler(int signo){
+        printf("Caught a signal: %d (SIGQUIT).\n",signo);
+        printf("Exiting forcefully.\n");
+        exit(1);
+}
+int main(){
+        signal(SIGQUIT,handler);
+        printf("Waiting for the signal (SIGQUIT).\n");;
+        while(1){
+                printf("Running...\n");
+                sleep(1);
+        }
+}
+
+```
+# 11. Write a program to handle the SIGTERM signal (termination request).
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<signal.h>
+#include<unistd.h>
+void handler(int signo){
+        printf("Caught a signal: %d (SIGTERM).\n",signo);
+        printf("Exiting forcefully.\n");
+        exit(1);
+}
+int main(){
+        printf("Process id: %d\n",getpid());
+        signal(SIGTERM,handler);
+        printf("Waiting for the signal (SIGTERM).\n");;
+        while(1){
+                printf("Running...\n");
+                sleep(1);
+        }
+}
+
+
+
+```
