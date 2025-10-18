@@ -1363,6 +1363,38 @@ int main(){
 }
 
 ```
+
+# 51. Write a C program that initializes a shared memory segment using shmget.
+
+```c
+#include<stdio.h>
+#include<sys/shm.h>
+#include<sys/types.h>
+#include<sys/ipc.h>
+#include<stdlib.h>
+int main(){
+        int key,shmid,size=512;
+
+        key=ftok("p51shmid",65);
+        if(key ==-1){
+                perror("ftok");
+                exit(EXIT_FAILURE);
+        }
+
+        shmid = shmget(key,size,IPC_CREAT|0666);
+        if(shmid==-1){
+                perror("shmget");
+                exit(EXIT_FAILURE);
+        }
+
+        printf("Shared Memory segment is created successfully.\n");
+        printf("Key = %d\n",key);
+        printf("Shared Memory ID: %d\n",shmid);
+        printf("Size = %d\n",size);
+}
+
+
+```
 # 61. Create a multithreaded program where threads synchronize using semaphore sets.
 ```c
 
