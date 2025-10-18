@@ -1395,6 +1395,71 @@ int main(){
 
 
 ```
+# 52. Develop a program that attaches to a previously created shared memory segment using shmat and detaches using shmdt.
+```c
+#include<stdio.h>
+#include<string.h>
+#include<sys/shm.h>
+#include<sys/types.h>
+#include<sys/ipc.h>
+#include<stdlib.h>
+int main(){
+        int key,shmid,size=512;
+
+        key=ftok("p52shmid",65);
+        if(key ==-1){
+                perror("ftok");
+                exit(EXIT_FAILURE);
+        }
+
+        shmid = shmget(key,size,IPC_CREAT|0666);
+        if(shmid==-1){
+                perror("shmget");
+                exit(EXIT_FAILURE);
+        }
+
+        printf("Shared Memory segment is created successfully.\n");
+        printf("Key = %d\n",key);
+        printf("Shared Memory ID: %d\n",shmid);
+        printf("Size = %d\n",size);
+
+        char *str=(char *)shmat(shmid,NULL,0);
+
+        if(str==(char *)-1){
+                perror("shmat");
+                exit(EXIT_FAILURE);
+        }
+
+        printf("Shared memory attached at address: %p\n",str);
+
+        printf("Writing msg to shared memory.\n");
+        char ch[100];
+        printf("Enter msg: ");
+        fgets(ch,sizeof(ch),stdin);
+        ch[strlen(ch)-1]='\0';
+
+        strcpy(str,ch);
+
+        printf("Message written: %s\n",str);
+
+        if(shmdt(str)==-1){
+                perror("shmdt");
+                exit(EXIT_FAILURE);
+        }
+
+        printf("Shared memory deatached successfully.\n");
+
+
+        if(shmctl(shmid,IPC_RMID,0)==-1){
+                perror("shmctl");
+                exit(EXIT_FAILURE);
+        }
+
+        printf("Shared memory destroyed successfully.\n");
+
+}
+
+```
 # 61. Create a multithreaded program where threads synchronize using semaphore sets.
 ```c
 
