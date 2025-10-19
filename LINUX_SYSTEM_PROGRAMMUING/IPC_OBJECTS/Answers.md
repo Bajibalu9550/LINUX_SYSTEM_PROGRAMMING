@@ -1460,6 +1460,81 @@ int main(){
 }
 
 ```
+# 53. Create a program that forks multiple processes, and each process communicates using shared memory.
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/ipc.h>
+#include<sys/shm.h>
+#include<string.h>
+#include<unistd.h>
+#include<sys/wait.h>
+int main(){
+        int key,shmid,SIZE;
+
+        key=ftok("p53shmid",65);
+        if(key==-1){
+                perror("ftok:");
+                exit(EXIT_FAILURE);
+        }
+
+        printf("Enter size: ");
+        scanf("%d",&SIZE);
+
+        shmid = shmget(key,SIZE,IPC_CREAT|0666);
+        if(shmid==-1){
+                perror("shmget");
+                exit(EXIT_FAILURE);
+        }
+
+        char *str=(char *)shmat(shmid,NULL,0);
+        if(str==(char *)-1){
+                perror("shmat");
+                exit(EXIT_FAILURE);
+        }
+
+        memset(str,0,SIZE);
+
+        for(int i=1;i<=3;i++){
+                int pid=fork();
+
+                if(pid<0){
+                        perror("fork");
+                        exit(EXIT_FAILURE);
+                }
+                if(pid==0){
+                        char msg[100];
+
+                        sprintf(msg,"Messsage write to shared memory by child process: %d (PID = %d)\n",i,getpid());
+                        strcat(str,msg);
+                        printf("Child %d wrote msg into shared memory.\n",i);
+
+                        shmdt(str);
+                        exit(0);
+                }
+        }
+        for(int i=1;i<=3;i++){
+                wait(NULL);
+        }
+
+        printf("All child process finished.\n");
+        printf("Data present in shared memory.\n");
+        printf("%s",str);
+
+        if(shmdt(str)==-1){
+                perror("shmdt");
+                exit(EXIT_FAILURE);
+        }
+
+
+        if(shmctl(shmid,IPC_RMID,0)==-1){
+                perror("shmctl");
+                exit(EXIT_FAILURE);
+        }
+}
+
+
+```
 # 61. Create a multithreaded program where threads synchronize using semaphore sets.
 ```c
 
