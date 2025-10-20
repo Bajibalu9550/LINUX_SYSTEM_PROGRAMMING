@@ -1535,6 +1535,72 @@ int main(){
 
 
 ```
+# 54. Write a program that dynamically creates shared memory segments based on user input.
+```c
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<sys/ipc.h>
+#include<sys/shm.h>
+
+int main(){
+
+        int n;
+        printf("Enter no of shared memories: ");
+        scanf("%d",&n);
+
+        if(n<=0){
+                printf("Invalid memory segments.\n");
+                exit(EXIT_FAILURE);
+        }
+        int shmid[n],SIZE[n];
+        for(int i=0;i<n;i++){
+                printf("Enter the size of the %d shared memory segment: ",i+1);
+                scanf("%d",&SIZE[i]);
+                getchar();
+                int key=ftok("p54shmid",65+i);
+                if(key==-1){
+                        perror("ftok");
+                        exit(EXIT_FAILURE);
+                }
+
+                if((shmid[i]=shmget(key,SIZE[i],IPC_CREAT|0666))==-1){
+                        perror("shmget");
+                        exit(EXIT_FAILURE);
+                }
+
+                printf("Shared Memory segment %d created successfully.\n",i+1);
+                printf("Key = %d\n",key);
+                printf("ID = %d\n",shmid[i]);
+                printf("Size = %d\n",SIZE[i]);
+
+        }
+
+        printf("All shared memory segments created successfully.\n");
+
+        char choice;
+        printf("Do you want to destroy all the shared memory segments. (y/n): ");
+        scanf("%c",&choice);
+        getchar();
+
+        if(choice =='y' || choice == 'Y'){
+                for(int i=0;i<n;i++){
+                        if(shmctl(shmid[i],IPC_RMID,0)==-1){
+                                perror("shmctl");
+                                //exit(EXIT_FAILURE);
+                        }
+                        else {
+                                printf("Segment %d (ID = %d) is destroyed successfully.\n",i+1,shmid[i]);
+                        }
+                }
+
+        }
+        else {
+                printf("Shared memory segments still avilable in the system.\n");
+        }
+}
+
+```
 # 61. Create a multithreaded program where threads synchronize using semaphore sets.
 ```c
 
