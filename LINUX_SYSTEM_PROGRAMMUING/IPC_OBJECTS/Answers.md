@@ -617,6 +617,249 @@ the kernel checks whether a message queue with the specified key already exists.
 
 If it doesn’t exist and the flag IPC_CREAT is given,
 the kernel creates a new message queue in its internal IPC (Inter-Process Communication) table.
+
+### **23. What is meant by Shared Memory?**
+Shared Memory is an **Interprocess Communication (IPC)** mechanism that allows **two or more processes to access the same portion of memory**. 
+This memory segment is created by one process and can be attached to other processes, allowing them to **read and write data directly** to the same memory area. 
+It provides the **fastest method of data exchange** between processes because data does not need to be copied through the kernel.
+
+---
+
+### **24. Why we use Shared Memory?**
+We use **Shared Memory** to achieve **high-speed communication** between processes. 
+It avoids the overhead of message passing since all processes can directly access the same memory region. 
+It is mostly used in **real-time and performance-critical applications**.
+
+**Advantages:**
+- Very fast communication (no kernel data copying).
+- Suitable for large data transfers.
+- Useful for data sharing between related or unrelated processes.
+
+---
+
+### **25. Difference between Shared Memory and Message Queues**
+
+| **Feature** | **Shared Memory** | **Message Queue** |
+|--------------|------------------|-------------------|
+| **Definition** | Allows multiple processes to access a common memory segment. | Allows processes to communicate using structured messages stored in a queue. |
+| **Communication Type** | Memory-based (direct access). | Message-based (kernel managed). |
+| **Speed** | Very fast (direct access). | Slower (involves kernel intervention). |
+| **Synchronization** | Requires additional mechanisms (like semaphores) to avoid conflicts. | Synchronization handled internally by the kernel. |
+| **Data Transfer** | Suitable for large data. | Suitable for small data or control messages. |
+| **Persistence** | Exists until removed using `shmctl()`. | Exists until deleted using `msgctl()`. |
+| **System Calls** | `shmget()`, `shmat()`, `shmdt()`, `shmctl()`. | `msgget()`, `msgsnd()`, `msgrcv()`, `msgctl()`. |
+
+---
+
+### **26. What is the use of stat command?**
+The **`stat`** command in Linux is used to **display detailed information about a file or directory**, such as:  
+- File type and permissions  
+- Inode number  
+- Ownership (user and group)  
+- Size in bytes  
+- Last access, modification, and change times  
+
+**Example:**
+```bash
+stat filename.txt
+```
+**Output shows:** File size, permissions, user ID, group ID, access times, etc.
+
+---
+
+### **27. What is the use of semctl command?**
+The **`semctl`** system call is used to **control and manage semaphore sets** in System V IPC.  
+It can perform various operations such as:
+- **Get or set semaphore values**
+- **Retrieve semaphore information**
+- **Remove semaphore set**
+
+**Syntax:**
+```c
+int semctl(int semid, int semnum, int cmd, ...);
+```
+**Common Commands:**
+- `IPC_RMID` → Remove semaphore set  
+- `GETVAL` → Get current value of a semaphore  
+- `SETVAL` → Set value of a semaphore  
+
+---
+
+### **28. How do we destroy the shared memory object?**
+A shared memory segment is destroyed using the **`shmctl()`** system call with the **`IPC_RMID`** command.
+
+**Syntax:**
+```c
+shmctl(shmid, IPC_RMID, NULL);
+```
+This call removes the shared memory segment identified by `shmid` from the system.
+
+---
+
+### **29. What is meant by Semaphores?**
+A **Semaphore** is a synchronization mechanism used to **control access to a shared resource** by multiple processes.  
+It is an integer variable that is modified using two atomic operations:
+- **Wait (P or down)** → Decreases semaphore value. If value < 0, the process waits.  
+- **Signal (V or up)** → Increases semaphore value. If processes are waiting, one is allowed to proceed.
+
+**Types of Semaphores:**
+1. **Binary Semaphore:** Takes values 0 or 1 (used for mutual exclusion).  
+2. **Counting Semaphore:** Can take any non-negative integer value (used for resource counting).
+
+**Usage:** Prevents race conditions, ensures mutual exclusion, and synchronizes process execution.
+
+---
+
+### **30. Why we use Semaphores?**
+Semaphores are used to **control access to shared resources** and to **synchronize multiple processes or threads**.  
+They prevent race conditions and ensure that only one process accesses a critical section at a time.
+
+**Uses:**
+- Ensuring **mutual exclusion**.
+- **Synchronizing** producer–consumer or reader–writer processes.
+- Controlling **resource allocation** among multiple processes.
+
+---
+
+### **31. What is meant by Synchronization?**
+**Synchronization** is the process of **coordinating the execution of multiple processes or threads** so that they operate in a controlled manner without conflicts.  
+It ensures that **shared resources are accessed by only one process at a time**, preventing inconsistencies and race conditions.
+
+**Example:**  
+If two processes try to update the same variable simultaneously, synchronization ensures that one completes before the other starts.
+
+---
+
+### **32. What is meant by Asynchronization?**
+**Asynchronization** means that processes or threads **execute independently without waiting for each other**.  
+In asynchronous execution, one process does not need to finish before another begins — they can work concurrently.
+
+**Example:**  
+In message queues, the sender can send a message and continue execution without waiting for the receiver.
+
+---
+
+### **33. Why we use Mutex Locks?**
+A **Mutex (Mutual Exclusion) Lock** is used to **protect critical sections** of code so that only **one thread or process** can execute them at a time.  
+It helps prevent **race conditions** and ensures **data consistency**.
+
+**Usage:**
+- Lock the critical section before accessing shared data.
+- Unlock after completing the operation.
+
+---
+
+### **34. What is the difference between Mutex Locks and Semaphores?**
+
+| **Feature** | **Mutex Lock** | **Semaphore** |
+|--------------|----------------|----------------|
+| **Definition** | A locking mechanism that allows only one thread to access a resource at a time. | A signaling mechanism that controls access to resources using counters. |
+| **Type** | Binary (0 or 1). | Binary or Counting. |
+| **Ownership** | Only the thread that locked it can unlock it. | Can be signaled by any process. |
+| **Usage** | Used for mutual exclusion. | Used for synchronization and resource counting. |
+| **Implementation** | Simpler and lighter. | More complex (managed by kernel). |
+| **Blocking Behavior** | Thread blocks if mutex is already locked. | Process may wait if semaphore count is zero. |
+
+---
+
+### **35. What is meant by Race Condition?**
+A **Race Condition** occurs when **two or more processes access shared data simultaneously**, and the **final result depends on the order of execution**.  
+It leads to **inconsistent or incorrect results**.
+
+**Example:**  
+If two processes increment the same variable at the same time without synchronization, the final value may be wrong.
+
+---
+
+### **36. What is meant by Deadlock?**
+A **Deadlock** is a situation in which **two or more processes are waiting for resources held by each other**, causing all of them to **wait forever**.
+
+**Necessary Conditions for Deadlock:**
+1. **Mutual Exclusion** – Only one process can use a resource at a time.  
+2. **Hold and Wait** – A process is holding one resource and waiting for another.  
+3. **No Preemption** – A resource cannot be forcibly taken away.  
+4. **Circular Wait** – A cycle of processes each waiting for the next.
+
+---
+
+### **37. What is meant by Critical Section?**
+A **Critical Section** is a part of a program where **shared resources (like variables or files)** are accessed.  
+Only one process or thread should execute in the critical section at a time to **prevent race conditions**.
+
+**Example:**  
+Updating a shared counter variable inside two processes must be done in a critical section protected by a semaphore or mutex.
+
+---
+
+### **38. What is the difference between System V and POSIX?**
+
+| **Feature** | **System V IPC** | **POSIX IPC** |
+|--------------|------------------|----------------|
+| **Introduction** | Older System V standard (AT&T UNIX). | Newer IEEE POSIX standard. |
+| **API Type** | System calls (`msgget`, `shmget`, `semget`). | Library functions (`mq_open`, `shm_open`, `sem_open`). |
+| **Identification** | Uses keys generated by `ftok()`. | Uses string names (e.g., "/myqueue"). |
+| **Communication** | Works between processes only. | Can work between processes and threads. |
+| **Ease of Use** | More complex and low-level. | Simpler and more user-friendly. |
+| **Resource Removal** | Removed using `msgctl`, `shmctl`, `semctl`. | Removed using `mq_unlink`, `shm_unlink`, `sem_unlink`. |
+| **Standardization** | Proprietary to UNIX systems. | Portable across UNIX-like systems. |
+
+---
+
+### **39. Steps to Create and Use a Named Pipe (FIFO) for IPC**
+
+1. **Create the FIFO** using `mkfifo()` or the shell command `mknod`.
+   ```c
+   mkfifo("fifo1", 0666);
+   ```
+2. **Open the FIFO** for reading or writing using `open()`.  
+3. **Write data** to the FIFO using `write()`.  
+4. **Read data** from the FIFO using `read()`.  
+5. **Close the FIFO** using `close()`.  
+6. **Remove FIFO** (optional) using `unlink()` when no longer needed.
+
+**Example:**
+```c
+mkfifo("fifo1", 0666);
+int fd = open("fifo1", O_WRONLY);
+write(fd, "Hello", 6);
+close(fd);
+```
+
+---
+
+### **40. Steps to Create and Use a Pipe for IPC**
+
+1. **Create the pipe** using the `pipe()` system call.
+   ```c
+   int fd[2];
+   pipe(fd);
+   ```
+   - `fd[0]` → read end  
+   - `fd[1]` → write end  
+
+2. **Fork the process** using `fork()`.  
+   - Parent writes data using `write(fd[1], ...)`  
+   - Child reads data using `read(fd[0], ...)`  
+
+3. **Close unused ends** after communication.  
+4. **Terminate processes** when communication completes.
+
+**Example:**
+```c
+int fd[2];
+pipe(fd);
+if (fork() == 0) {
+    close(fd[1]);
+    char msg[50];
+    read(fd[0], msg, sizeof(msg));
+    printf("Child received: %s", msg);
+} else {
+    close(fd[0]);
+    write(fd[1], "Hello Child", 12);
+}
+```
+
+---
 # 41. Implement a program that uses pipes for communication between a parent and child process. Show how data can be passed between processes using pipes.
 
 ```c
