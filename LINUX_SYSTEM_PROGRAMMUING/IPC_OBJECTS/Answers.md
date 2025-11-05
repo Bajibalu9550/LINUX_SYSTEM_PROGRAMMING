@@ -552,7 +552,71 @@ A message queue is a communication mechanism used in Inter-Process Communication
 
 4. Communication can happen between any two or more unrelated processes.
 ```
+# 19. Why we use message queues?
 
+### Definition:
+
+A message queue is a method of interprocess communication (IPC) that allows processes to exchange data in the form of messages.
+It provides a queue (FIFO) structure maintained by the operating system kernel, where messages can be stored temporarily until the receiving process reads them.
+
+### Purpose:
+
+The main purpose of message queues is to enable asynchronous communication between processes.
+That means the sender and receiver processes do not need to run at the same time — one process can send a message and continue its execution, while another process can receive it later.
+
+### Features of Message Queues:
+
+   - Communication takes place through the kernel (not by direct memory sharing).
+
+   - Messages are stored in a queue and can be retrieved in the order they are sent (FIFO).
+ 
+   - Each message has a type, which allows selective receiving.
+
+   - Processes are decoupled, i.e., they do not need to know each other’s identity.
+
+   - Message queues provide synchronization between processes.
+
+   - Communication is asynchronous — the sender doesn’t have to wait for the receiver.
+     
+# 20. What is difference between Named Pipe and Message Queue?
+| **Feature**                   | **Named Pipe (FIFO)**                                                                                           | **Message Queue**                                                                                            |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Definition**                | A special file that allows unidirectional or bidirectional data flow between processes in a byte stream format. | A kernel-managed queue that allows processes to exchange structured messages.                                |
+| **Communication Type**        | Byte-oriented (stream-based).                                                                                   | Message-oriented (each message has a type and data).                                                         |
+| **Identification**            | Identified by a name in the file system (created using `mkfifo()` or `mknod()`).                                | Identified by a key (System V) or name (POSIX) created using `ftok()` or specified in `mq_open()`.           |
+| **Data Storage**              | Data flows continuously without message boundaries.                                                             | Messages are stored separately in the queue with boundaries.                                                 |
+| **Synchronization**           | Sender and receiver must coordinate; synchronous communication.                                                 | Asynchronous communication; sender and receiver work independently.                                          |
+| **Selective Receiving**       | Not possible — data is read in order.                                                                           | Possible — receiver can choose messages by type.                                                             |
+| **Persistence**               | Data is removed once read.                                                                                      | Messages remain in queue until explicitly received or queue is deleted.                                      |
+| **Communication Scope**       | Can be used between related or unrelated processes if accessible.                                               | Can be used between any processes having access to the queue key or name.                                    |
+| **Full Duplex Communication** | Requires two FIFOs for two-way communication.                                                                   | A single queue can support two-way communication using message types.                                        |
+| **Speed**                     | Faster (simple byte stream).                                                                                    | Slower (kernel-managed and structured).                                                                      |
+| **Complexity**                | Simple to implement.                                                                                            | More complex due to structured format and system calls.                                                      |
+| **System Calls**              | `mkfifo()`, `write()`, `read()`, `unlink()`.                                                                    | `msgget()`, `msgsnd()`, `msgrcv()`, `msgctl()` (or `mq_open()`, `mq_send()`, `mq_receive()`, `mq_unlink()`). |
+| **Use Cases**                 | Simple data streaming, producer-consumer models.                                                                | Asynchronous client-server communication, logging, and real-time systems.                                    |
+
+
+# 21. What is the system call used to create the message queue?
+### System call is  -  int msgget(key_t key, int msgflg);
+| **Parameter** | **Description**                                                                                                       |
+| ------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `key`         | A unique key value (usually generated using the `ftok()` function) used to identify the message queue.                |
+| `msgflg`      | Flags that control permissions and creation options (e.g., `IPC_CREAT`, `IPC_EXCL`, and permission bits like `0666`). |
+
+
+# 22. Where was the message queue created?
+
+The message queue is created and maintained by the operating system kernel — not in the user’s memory or file system.
+
+📍 Detailed Explanation:
+
+When a process calls the system call:
+### msgget(key, msgflg);
+
+the kernel checks whether a message queue with the specified key already exists.
+
+If it doesn’t exist and the flag IPC_CREAT is given,
+the kernel creates a new message queue in its internal IPC (Inter-Process Communication) table.
 # 41. Implement a program that uses pipes for communication between a parent and child process. Show how data can be passed between processes using pipes.
 
 ```c
