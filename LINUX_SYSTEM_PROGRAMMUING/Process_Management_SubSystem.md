@@ -5,13 +5,13 @@ Process Management Subsystem
 
 ## Process:   The Process is nothing but the program running in user space of RAM
 
-gcc filename.c  a.out  execute
+gcc filename.c --> a.out  execute
 
---> a.out file is stored in the hard-disk, when it is executed it get loaded into the RAM. The memory segment get loaded into the user space and the PCB of the program or process get loaded into the kernel.
+- a.out file is stored in the hard-disk, when it is executed it get loaded into the RAM. The memory segment get loaded into the user space and the PCB of the program or process get loaded into the kernel.
 
                                                                   (OR)
 
---> Whenever a program comes into execution the contents of executable binary (a.out) copied from hard-disk to user space of RAM.
+- Whenever a program comes into execution the contents of executable binary (a.out) copied from hard-disk to user space of RAM.
 
 ### The RAM is divided into two parts:
 
@@ -19,7 +19,7 @@ gcc filename.c  a.out  execute
 
 2. Kernel Space of RAM --> Lower part of RAM
 
--->Whenever the program loaded into RAM , Two more memory segments are added. Those are Heap & Stack Segments.
+- Whenever the program loaded into RAM , Two more memory segments are added. Those are Heap & Stack Segments.
 
 PCB: For every process we create a block of information in kernel space of RAM is known as Process Control Block or Process Descriptor
 
@@ -35,7 +35,7 @@ PCB: For every process we create a block of information in kernel space of RAM i
 
 **3. File Descriptor Table(FD table)**
 
-      It contains information about the file that are being opened by the programmer. There are many files in kernel but it does not maintains all the information of these files.
+    It contains information about the file that are being opened by the programmer. There are many files in kernel but it does not maintains all the information of these files.
 
 **4. Signal Disposition Table/Signal Disposition/Disposition of Signal/Signal behaviour table**
 
@@ -182,7 +182,7 @@ __Note :__ When the exit is called then process is removed, i.e, removed means m
 
   `````
                   WEXITSTATUS(stat);
-  ```````` 
+  `````
 
   &rarr; WEXITSTATUS(stat) is a predefined macro which extract 1 byte of exit code from the 4 byte variable.
 
