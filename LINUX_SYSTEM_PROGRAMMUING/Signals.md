@@ -42,7 +42,7 @@
     ---
      
         
-    ![](../images/Exception.png)
+     ![](../images/Exception.png)
 
      - Memory in CPU is calles CPU registers.
      - CPU interface to our peripheral/via system bus.
